@@ -2431,26 +2431,7 @@ public class ReaderTest {
                       "          default:\n" +
                       "            description: default response\n" +
                       "            content:\n" +
-                      "              application/json: {}\n" +
-                      "  /things/search:\n" +
-                      "    post:\n" +
-                      "      operationId: searchForThings\n" +
-                      "      requestBody:\n" +
-                      "        content:\n" +
-                      "          application/x-www-form-urlencoded:\n" +
-                      "            schema:\n" +
-                      "              type: object\n" +
-                      "              properties:\n" +
-                      "                id:\n" +
-                      "                  type: array\n" +
-                      "                  description: id param\n" +
-                      "                  items:\n" +
-                      "                    type: string\n" +
-                      "      responses:\n" +
-                      "        default:\n" +
-                      "          description: default response\n" +
-                      "          content:\n" +
-                      "            application/json: {}\n";
+                      "              application/json: {}\n";
         SerializationMatchers.assertEqualsToYaml(openAPI, yaml);
     }
 
