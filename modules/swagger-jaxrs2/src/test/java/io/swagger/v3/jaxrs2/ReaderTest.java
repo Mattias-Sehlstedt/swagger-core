@@ -17,87 +17,7 @@ import io.swagger.v3.core.util.PrimitiveType;
 import io.swagger.v3.jaxrs2.matchers.SerializationMatchers;
 import io.swagger.v3.jaxrs2.petstore31.PetResource;
 import io.swagger.v3.jaxrs2.petstore31.TagResource;
-import io.swagger.v3.jaxrs2.resources.ArraySchemaImplementationResource;
-import io.swagger.v3.jaxrs2.resources.DefaultResponseResource;
-import io.swagger.v3.jaxrs2.resources.Misc31Resource;
-import io.swagger.v3.jaxrs2.resources.ParameterMaximumValueResource;
-import io.swagger.v3.jaxrs2.resources.ResponseReturnTypeResource;
-import io.swagger.v3.jaxrs2.resources.SchemaAdditionalPropertiesBooleanResource;
-import io.swagger.v3.jaxrs2.resources.SchemaAdditionalPropertiesResource;
-import io.swagger.v3.jaxrs2.resources.SchemaPropertiesResource;
-import io.swagger.v3.jaxrs2.resources.SiblingPropResource;
-import io.swagger.v3.jaxrs2.resources.SiblingsResource;
-import io.swagger.v3.jaxrs2.resources.SiblingsResourceRequestBody;
-import io.swagger.v3.jaxrs2.resources.SiblingsResourceRequestBodyMultiple;
-import io.swagger.v3.jaxrs2.resources.SiblingsResourceResponse;
-import io.swagger.v3.jaxrs2.resources.SiblingsResourceSimple;
-import io.swagger.v3.jaxrs2.resources.SingleExampleResource;
-import io.swagger.v3.jaxrs2.resources.BasicFieldsResource;
-import io.swagger.v3.jaxrs2.resources.BookStoreTicket2646;
-import io.swagger.v3.jaxrs2.resources.ClassPathParentResource;
-import io.swagger.v3.jaxrs2.resources.ClassPathSubResource;
-import io.swagger.v3.jaxrs2.resources.CompleteFieldsResource;
-import io.swagger.v3.jaxrs2.resources.DeprecatedFieldsResource;
-import io.swagger.v3.jaxrs2.resources.DuplicatedOperationIdResource;
-import io.swagger.v3.jaxrs2.resources.DuplicatedOperationMethodNameResource;
-import io.swagger.v3.jaxrs2.resources.DuplicatedSecurityResource;
-import io.swagger.v3.jaxrs2.resources.EnhancedResponsesResource;
-import io.swagger.v3.jaxrs2.resources.ExternalDocsReference;
-import io.swagger.v3.jaxrs2.resources.MyClass;
-import io.swagger.v3.jaxrs2.resources.MyOtherClass;
-import io.swagger.v3.jaxrs2.resources.RefCallbackResource;
-import io.swagger.v3.jaxrs2.resources.RefExamplesResource;
-import io.swagger.v3.jaxrs2.resources.RefHeaderResource;
-import io.swagger.v3.jaxrs2.resources.RefLinksResource;
-import io.swagger.v3.jaxrs2.resources.RefParameter3029Resource;
-import io.swagger.v3.jaxrs2.resources.RefParameter3074Resource;
-import io.swagger.v3.jaxrs2.resources.RefParameterResource;
-import io.swagger.v3.jaxrs2.resources.RefRequestBodyResource;
-import io.swagger.v3.jaxrs2.resources.RefResponsesResource;
-import io.swagger.v3.jaxrs2.resources.RefSecurityResource;
-import io.swagger.v3.jaxrs2.resources.ResourceWithSubResource;
-import io.swagger.v3.jaxrs2.resources.ResponseContentWithArrayResource;
-import io.swagger.v3.jaxrs2.resources.ResponsesResource;
-import io.swagger.v3.jaxrs2.resources.SecurityResource;
-import io.swagger.v3.jaxrs2.resources.ServersResource;
-import io.swagger.v3.jaxrs2.resources.SimpleCallbackResource;
-import io.swagger.v3.jaxrs2.resources.SimpleExamplesResource;
-import io.swagger.v3.jaxrs2.resources.SimpleMethods;
-import io.swagger.v3.jaxrs2.resources.SimpleParameterResource;
-import io.swagger.v3.jaxrs2.resources.SimpleRequestBodyResource;
-import io.swagger.v3.jaxrs2.resources.SimpleResponsesResource;
-import io.swagger.v3.jaxrs2.resources.SubResourceHead;
-import io.swagger.v3.jaxrs2.resources.TagsResource;
-import io.swagger.v3.jaxrs2.resources.Test2607;
-import io.swagger.v3.jaxrs2.resources.TestResource;
-import io.swagger.v3.jaxrs2.resources.Ticket2340Resource;
-import io.swagger.v3.jaxrs2.resources.Ticket2644ConcreteImplementation;
-import io.swagger.v3.jaxrs2.resources.Ticket2763Resource;
-import io.swagger.v3.jaxrs2.resources.Ticket2793Resource;
-import io.swagger.v3.jaxrs2.resources.Ticket2794Resource;
-import io.swagger.v3.jaxrs2.resources.Ticket2806Resource;
-import io.swagger.v3.jaxrs2.resources.Ticket2818Resource;
-import io.swagger.v3.jaxrs2.resources.Ticket2848Resource;
-import io.swagger.v3.jaxrs2.resources.Ticket3015Resource;
-import io.swagger.v3.jaxrs2.resources.Ticket3587Resource;
-import io.swagger.v3.jaxrs2.resources.Ticket3731BisResource;
-import io.swagger.v3.jaxrs2.resources.Ticket3731Resource;
-import io.swagger.v3.jaxrs2.resources.Ticket4065Resource;
-import io.swagger.v3.jaxrs2.resources.Ticket4412Resource;
-import io.swagger.v3.jaxrs2.resources.Ticket4446Resource;
-import io.swagger.v3.jaxrs2.resources.Ticket4483Resource;
-import io.swagger.v3.jaxrs2.resources.Ticket4804CustomClass;
-import io.swagger.v3.jaxrs2.resources.Ticket4804NotBlankResource;
-import io.swagger.v3.jaxrs2.resources.Ticket4804ProcessorResource;
-import io.swagger.v3.jaxrs2.resources.Ticket4804Resource;
-import io.swagger.v3.jaxrs2.resources.Ticket4850Resource;
-import io.swagger.v3.jaxrs2.resources.Ticket4859Resource;
-import io.swagger.v3.jaxrs2.resources.Ticket4878Resource;
-import io.swagger.v3.jaxrs2.resources.Ticket4879Resource;
-import io.swagger.v3.jaxrs2.resources.UploadResource;
-import io.swagger.v3.jaxrs2.resources.UrlEncodedResourceWithEncodings;
-import io.swagger.v3.jaxrs2.resources.UserAnnotationResource;
-import io.swagger.v3.jaxrs2.resources.WebHookResource;
+import io.swagger.v3.jaxrs2.resources.*;
 import io.swagger.v3.jaxrs2.resources.extensions.ExtensionsResource;
 import io.swagger.v3.jaxrs2.resources.extensions.OperationExtensionsResource;
 import io.swagger.v3.jaxrs2.resources.extensions.ParameterExtensionsResource;
@@ -2486,6 +2406,51 @@ public class ReaderTest {
                 "          description: default response\n" +
                 "          content:\n" +
                 "            application/json: {}\n";
+        SerializationMatchers.assertEqualsToYaml(openAPI, yaml);
+    }
+
+    @Test
+    public void testRequestBodySingleUrlEncodedResource() {
+        Reader reader = new Reader(new OpenAPI());
+
+        OpenAPI openAPI = reader.read(SingleUrlEncodedResource.class);
+        String yaml = "openapi: 3.0.1\n" +
+                      "paths:\n" +
+                      "  /things/search-id:\n" +
+                      "      post:\n" +
+                      "        operationId: searchForThing\n" +
+                      "        requestBody:\n" +
+                      "          content:\n" +
+                      "            application/x-www-form-urlencoded:\n" +
+                      "              schema:\n" +
+                      "                type: object\n" +
+                      "                properties:\n" +
+                      "                  id:\n" +
+                      "                    type: string\n" +
+                      "        responses:\n" +
+                      "          default:\n" +
+                      "            description: default response\n" +
+                      "            content:\n" +
+                      "              application/json: {}\n" +
+                      "  /things/search:\n" +
+                      "    post:\n" +
+                      "      operationId: searchForThings\n" +
+                      "      requestBody:\n" +
+                      "        content:\n" +
+                      "          application/x-www-form-urlencoded:\n" +
+                      "            schema:\n" +
+                      "              type: object\n" +
+                      "              properties:\n" +
+                      "                id:\n" +
+                      "                  type: array\n" +
+                      "                  description: id param\n" +
+                      "                  items:\n" +
+                      "                    type: string\n" +
+                      "      responses:\n" +
+                      "        default:\n" +
+                      "          description: default response\n" +
+                      "          content:\n" +
+                      "            application/json: {}\n";
         SerializationMatchers.assertEqualsToYaml(openAPI, yaml);
     }
 
