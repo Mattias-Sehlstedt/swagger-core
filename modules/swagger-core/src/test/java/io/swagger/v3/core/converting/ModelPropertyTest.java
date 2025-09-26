@@ -72,7 +72,7 @@ public class ModelPropertyTest {
 
     @Test(description = "it should read a model with property dataTypes configured #679")
     public void readDataTypesProperty() {
-        final Map<String, Schema> models = ModelConverters.getInstance().readAll(ModelWithModelPropertyOverrides.class);
+        final Map<String, Schema> models = ModelConverters.getInstance(true).readAll(ModelWithModelPropertyOverrides.class);
         final String json = "{" +
                 "   \"Children\":{" +
                 "      \"type\":\"object\"," +
@@ -94,7 +94,7 @@ public class ModelPropertyTest {
                 "      }" +
                 "   }" +
                 "}";
-        SerializationMatchers.assertEqualsToJson(models, json);
+        SerializationMatchers.assertEqualsToJson31(models, json);
     }
 
     @Test

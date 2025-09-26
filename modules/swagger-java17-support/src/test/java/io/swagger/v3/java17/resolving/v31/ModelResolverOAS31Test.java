@@ -1,11 +1,12 @@
 package io.swagger.v3.java17.resolving.v31;
 
 import io.swagger.v3.core.converter.ModelConverters;
+import io.swagger.v3.java17.matchers.SerializationMatchers;
 import io.swagger.v3.java17.resolving.SwaggerTestBase;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Schema;
 import org.testng.annotations.Test;
-import io.swagger.v3.java17.matchers.SerializationMatchers;
+
 import java.util.List;
 import java.util.Map;
 
