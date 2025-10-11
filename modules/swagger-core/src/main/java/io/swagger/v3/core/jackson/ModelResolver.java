@@ -757,9 +757,7 @@ public class ModelResolver extends AbstractModelConverter implements ModelConver
                     List<Annotation> ctxAnnotations31List = new ArrayList<>();
                     if (annotations != null) {
                         for (Annotation a : annotations) {
-                            if (
-                                    !(a instanceof io.swagger.v3.oas.annotations.media.Schema) &&
-                                            !(a instanceof io.swagger.v3.oas.annotations.media.ArraySchema)) {
+                            if (!annotationUsing31Setting(a)) {
                                 ctxAnnotations31List.add(a);
                             }
                             if ((ctxSchema != null) && (!ctxSchema.implementation().equals(Void.class) || StringUtils.isNotEmpty(ctxSchema.type()))) {
@@ -3607,5 +3605,28 @@ public class ModelResolver extends AbstractModelConverter implements ModelConver
         return !openapi31 ||
                 (Boolean.parseBoolean(System.getProperty(Schema.APPLY_SCHEMA_RESOLUTION_PROPERTY, "false")) ||
                         Boolean.parseBoolean(System.getenv(Schema.APPLY_SCHEMA_RESOLUTION_PROPERTY)));
+    }
+
+    private boolean annotationUsing31Setting(Annotation annotation) {
+        if (annotation instanceof io.swagger.v3.oas.annotations.media.Schema) {
+            io.swagger.v3.oas.annotations.media.Schema schemaAnnotation = (io.swagger.v3.oas.annotations.media.Schema) annotation;
+            return schemaAnnotation.types() != null ||
+                   schemaAnnotation.contains() != null ||
+                   schemaAnnotation.$id() != null ||
+                   schemaAnnotation.$schema() != null ||
+                   schemaAnnotation.$anchor() != null ||
+                   schemaAnnotation.$vocabulary() != null ||
+                   schemaAnnotation.$dynamicAnchor() != null ||
+                   schemaAnnotation.$dynamicRef() != null ||
+                   !schemaAnnotation.contentEncoding().equals("") ||
+                   !schemaAnnotation.contentMediaType().equals("") ||
+                   schemaAnnotation.dependentSchemas().length != 0 ||
+                   schemaAnnotation.patternProperties().length != 0;
+        }
+        if (annotation instanceof io.swagger.v3.oas.annotations.media.ArraySchema) {
+            io.swagger.v3.oas.annotations.media.ArraySchema schemaAnnotation = (io.swagger.v3.oas.annotations.media.ArraySchema) annotation;
+            return schemaAnnotation.prefixItems().length != 0;
+        }
+        return false;
     }
 }

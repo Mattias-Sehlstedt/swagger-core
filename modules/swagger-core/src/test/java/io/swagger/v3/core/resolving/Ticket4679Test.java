@@ -1,11 +1,7 @@
 package io.swagger.v3.core.resolving;
 
-import io.swagger.v3.core.converter.AnnotatedType;
 import io.swagger.v3.core.converter.ModelConverters;
-import io.swagger.v3.core.converter.ResolvedSchema;
 import io.swagger.v3.core.matchers.SerializationMatchers;
-import io.swagger.v3.core.util.Yaml;
-import io.swagger.v3.core.util.Yaml31;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.testng.annotations.Test;
@@ -13,19 +9,19 @@ import org.testng.annotations.Test;
 import java.util.List;
 import java.util.Map;
 
-public class Ticket4679Test extends SwaggerTestBase{
+public class Ticket4679Test extends SwaggerTestBase {
 
     @Test(description = "Custom schema implementation in property overrides type value")
     public void testCustomSchemaImplementation() {
 
         String expectedYaml = "ModelWithCustomSchemaImplementationInProperty:\n" +
-                "  type: object\n" +
-                "  properties:\n" +
-                "    exampleField:\n" +
-                "      type: integer\n" +
-                "      format: int32\n" +
-                "    secondExampleField:\n" +
-                "      type: string\n";
+                              "  type: object\n" +
+                              "  properties:\n" +
+                              "    exampleField:\n" +
+                              "      type: integer\n" +
+                              "      format: int32\n" +
+                              "    secondExampleField:\n" +
+                              "      type: string\n";
 
         Map<String, io.swagger.v3.oas.models.media.Schema> stringSchemaMap = ModelConverters.getInstance(true).readAll(ModelWithCustomSchemaImplementationInProperty.class);
         SerializationMatchers.assertEqualsToYaml31(stringSchemaMap, expectedYaml);
@@ -51,18 +47,14 @@ public class Ticket4679Test extends SwaggerTestBase{
                               "      type: string\n";
 
         Map<String, io.swagger.v3.oas.models.media.Schema> stringSchemaMap = ModelConverters.getInstance(true).readAll(ListCarrier.class);
-        ResolvedSchema resolvedSchema3_0 = ModelConverters.getInstance(false)
-                .resolveAsResolvedSchema(new AnnotatedType(ListCarrier.class));
-        ResolvedSchema resolvedSchema3_1 = ModelConverters.getInstance(false)
-                .resolveAsResolvedSchema(new AnnotatedType(ListCarrier.class));
         SerializationMatchers.assertEqualsToYaml31(stringSchemaMap, expectedYaml);
     }
 
     @Test
     public void testOAS31ArraySchemaWithImplementation() {
-        String expectedYaml = "ListCarrierArrayItem:\n" +
+        String expectedYaml = "ListArrayItemWithDifferentSchemaDescription:\n" +
                               "  type: object\n" +
-                              "  description: ListItem Description\n" +
+                              "  description: Different description\n" +
                               "  properties:\n" +
                               "    itemInfo:\n" +
                               "      type: string\n" +
@@ -72,15 +64,10 @@ public class Ticket4679Test extends SwaggerTestBase{
                               "    listItems:\n" +
                               "      type: array\n" +
                               "      items:\n" +
-                              // This Schema points to a non-existent ref?
                               "        $ref: \"#/components/schemas/ListArrayItemWithDifferentSchemaDescription\"\n" +
                               "        description: List of ListItem\n";
 
         Map<String, io.swagger.v3.oas.models.media.Schema> stringSchemaMap = ModelConverters.getInstance(true).readAll(ListCarrierArraySchema.class);
-        ResolvedSchema resolvedSchema3_0 = ModelConverters.getInstance(false)
-                .resolveAsResolvedSchema(new AnnotatedType(ListCarrierArraySchema.class));
-        ResolvedSchema resolvedSchema3_1 = ModelConverters.getInstance(false)
-                .resolveAsResolvedSchema(new AnnotatedType(ListCarrierArraySchema.class));
         SerializationMatchers.assertEqualsToYaml31(stringSchemaMap, expectedYaml);
     }
 
