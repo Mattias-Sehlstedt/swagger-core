@@ -72,28 +72,55 @@ public class ModelPropertyTest {
 
     @Test(description = "it should read a model with property dataTypes configured #679")
     public void readDataTypesProperty() {
+        final Map<String, Schema> models = ModelConverters.getInstance().readAll(ModelWithModelPropertyOverrides.class);
+        final String json = "{" +
+                            "   \"Children\":{" +
+                            "      \"type\":\"object\"," +
+                            "      \"properties\":{" +
+                            "         \"name\":{" +
+                            "            \"type\":\"string\"" +
+                            "         }" +
+                            "      }" +
+                            "   }," +
+                            "   \"ModelWithModelPropertyOverrides\":{" +
+                            "      \"type\":\"object\"," +
+                            "      \"properties\":{" +
+                            "         \"children\":{" +
+                            "            \"type\":\"array\"," +
+                            "            \"items\":{" +
+                            "               \"$ref\":\"#/components/schemas/Children\"" +
+                            "            }" +
+                            "         }" +
+                            "      }" +
+                            "   }" +
+                            "}";
+        SerializationMatchers.assertEqualsToJson(models, json);
+    }
+
+    @Test(description = "it should read a model with property dataTypes configured #679")
+    public void readDataTypesProperty31() {
         final Map<String, Schema> models = ModelConverters.getInstance(true).readAll(ModelWithModelPropertyOverrides.class);
         final String json = "{" +
-                "   \"Children\":{" +
-                "      \"type\":\"object\"," +
-                "      \"properties\":{" +
-                "         \"name\":{" +
-                "            \"type\":\"string\"" +
-                "         }" +
-                "      }" +
-                "   }," +
-                "   \"ModelWithModelPropertyOverrides\":{" +
-                "      \"type\":\"object\"," +
-                "      \"properties\":{" +
-                "         \"children\":{" +
-                "            \"type\":\"array\"," +
-                "            \"items\":{" +
-                "               \"$ref\":\"#/components/schemas/Children\"" +
-                "            }" +
-                "         }" +
-                "      }" +
-                "   }" +
-                "}";
+                            "   \"Children\":{" +
+                            "      \"type\":\"object\"," +
+                            "      \"properties\":{" +
+                            "         \"name\":{" +
+                            "            \"type\":\"string\"" +
+                            "         }" +
+                            "      }" +
+                            "   }," +
+                            "   \"ModelWithModelPropertyOverrides\":{" +
+                            "      \"type\":\"object\"," +
+                            "      \"properties\":{" +
+                            "         \"children\":{" +
+                            "            \"type\":\"array\"," +
+                            "            \"items\":{" +
+                            "               \"$ref\":\"#/components/schemas/Children\"" +
+                            "            }" +
+                            "         }" +
+                            "      }" +
+                            "   }" +
+                            "}";
         SerializationMatchers.assertEqualsToJson31(models, json);
     }
 
