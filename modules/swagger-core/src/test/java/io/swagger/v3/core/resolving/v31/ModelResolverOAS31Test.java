@@ -10,6 +10,7 @@ import io.swagger.v3.core.resolving.resources.TestArrayType;
 import io.swagger.v3.core.resolving.resources.TestObject4715;
 import io.swagger.v3.core.resolving.v31.model.AnnotatedArray;
 import io.swagger.v3.core.resolving.v31.model.ModelWithDependentSchema;
+import io.swagger.v3.core.resolving.v31.model.ModelWithNullable;
 import io.swagger.v3.core.resolving.v31.model.ModelWithOAS31Stuff;
 import io.swagger.v3.oas.models.media.Schema;
 import org.testng.annotations.Test;
@@ -375,5 +376,22 @@ public class ModelResolverOAS31Test extends SwaggerTestBase {
         public void setMyField(Number myField) {
             this.myField = myField;
         }
+    }
+
+    @Test(description = "Nullable field")
+    public void testNullableField() {
+        String expectedYaml = "ModelWithNullable:\n" +
+                              "  type: object\n" +
+                              "  properties:\n" +
+                              "    property:\n" +
+                              "      type: string\n" +
+                              "    property2:\n" +
+                              "      type:\n" +
+                              "        - string\n" +
+                              "        - \"null\"\n";
+
+        Map<String, io.swagger.v3.oas.models.media.Schema> stringSchemaMap = ModelConverters.getInstance(true)
+                .readAll(ModelWithNullable.class);
+        SerializationMatchers.assertEqualsToYaml31(stringSchemaMap, expectedYaml);
     }
 }
