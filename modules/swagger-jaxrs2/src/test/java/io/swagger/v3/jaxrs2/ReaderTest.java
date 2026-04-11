@@ -101,6 +101,7 @@ import io.swagger.v3.jaxrs2.resources.UploadResource;
 import io.swagger.v3.jaxrs2.resources.UrlEncodedResourceWithEncodings;
 import io.swagger.v3.jaxrs2.resources.UserAnnotationResource;
 import io.swagger.v3.jaxrs2.resources.WebHookResource;
+import io.swagger.v3.jaxrs2.resources.Ticket5105Resource;
 import io.swagger.v3.jaxrs2.resources.extensions.ExtensionsResource;
 import io.swagger.v3.jaxrs2.resources.extensions.OperationExtensionsResource;
 import io.swagger.v3.jaxrs2.resources.extensions.ParameterExtensionsResource;
@@ -5669,6 +5670,59 @@ public class ReaderTest {
                 "      enum:\n" +
                 "      - FOO\n" +
                 "      - BAR\n";
+        SerializationMatchers.assertEqualsToYaml31(openAPI, yaml);
+        ModelResolver.enumsAsRef = false;
+    }
+
+    @Test
+    void testTicket5105() {
+        ModelResolver.enumsAsRef = true;
+        SwaggerConfiguration config = new SwaggerConfiguration().openAPI31(true);
+        Reader reader = new Reader(config);
+        OpenAPI openAPI = reader.read(Ticket5105Resource.class);
+
+        String yaml = "openapi: 3.1.0\n" +
+                      "paths:\n" +
+                      "  /users:\n" +
+                      "    get:\n" +
+                      "      summary: List users\n" +
+                      "      operationId: getUsers\n" +
+                      "      parameters:\n" +
+                      "      - name: filter\n" +
+                      "        in: query\n" +
+                      "        schema:\n" +
+                      "          type: string\n" +
+                      "      - name: page\n" +
+                      "        in: query\n" +
+                      "        schema:\n" +
+                      "          type: integer\n" +
+                      "          format: int32\n" +
+                      "      responses:\n" +
+                      "        default:\n" +
+                      "          description: default response\n" +
+                      "          content:\n" +
+                      "            '*/*':\n" +
+                      "              schema:\n" +
+                      "                $ref: \"#/components/schemas/UserResponse\"\n" +
+                      "    post:\n" +
+                      "      summary: Create user\n" +
+                      "      operationId: createUser\n" +
+                      "      requestBody:\n" +
+                      "        content:\n" +
+                      "          '*/*':\n" +
+                      "            schema:\n" +
+                      "              $ref: \"#/components/schemas/Request\"\n" +
+                      "      responses:\n" +
+                      "        default:\n" +
+                      "          description: default response\n" +
+                      "          content:\n" +
+                      "            '*/*':\n" +
+                      "              schema:\n" +
+                      "                $ref: \"#/components/schemas/UserResponse\"\n" +
+                      "components:\n" +
+                      "  schemas:\n" +
+                      "    UserResponse: {}\n" +
+                      "    Request: {}";
         SerializationMatchers.assertEqualsToYaml31(openAPI, yaml);
         ModelResolver.enumsAsRef = false;
     }
