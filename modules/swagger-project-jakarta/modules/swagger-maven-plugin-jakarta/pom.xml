@@ -60,7 +60,7 @@
                 <executions>
                     <execution>
                         <id>copy-file</id>
-                        <phase>compile</phase>
+                        <phase>package</phase>
                         <goals>
                             <goal>rename</goal>
                         </goals>

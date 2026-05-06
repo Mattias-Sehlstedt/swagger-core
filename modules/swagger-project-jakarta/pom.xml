@@ -234,7 +234,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.7.0</version>
+                <version>${maven-javadoc-plugin-version}</version>
                 <configuration>
                     <aggregate>true</aggregate>
                     <source>1.8</source>
@@ -491,6 +491,7 @@
         <surefire-version>2.22.2</surefire-version>
         <enforcer-plugin-version>3.2.1</enforcer-plugin-version>
         <failsafe-plugin-version>2.22.2</failsafe-plugin-version>
+        <maven-javadoc-plugin-version>3.7.0</maven-javadoc-plugin-version>
 
         <coverage.complexity.minimum>0.90</coverage.complexity.minimum>
         <coverage.line.minimum>0.90</coverage.line.minimum>
