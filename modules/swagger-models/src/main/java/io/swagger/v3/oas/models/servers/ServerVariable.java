@@ -1,5 +1,6 @@
 package io.swagger.v3.oas.models.servers;
 
+import io.swagger.v3.oas.models.internal.ExtensionUtils;
 import io.swagger.v3.oas.models.annotations.OpenAPI31;
 
 import java.util.ArrayList;
@@ -109,7 +110,7 @@ public class ServerVariable {
     }
 
     public void addExtension(String name, Object value) {
-        if (name == null || name.isEmpty() || !name.startsWith("x-")) {
+        if (!ExtensionUtils.isVendorExtension(name)) {
             return;
         }
         if (this.extensions == null) {
@@ -120,7 +121,7 @@ public class ServerVariable {
 
     @OpenAPI31
     public void addExtension31(String name, Object value) {
-        if (name != null && (name.startsWith("x-oas-") || name.startsWith("x-oai-"))) {
+        if (ExtensionUtils.is31VendorExtension(name)) {
             return;
         }
         addExtension(name, value);

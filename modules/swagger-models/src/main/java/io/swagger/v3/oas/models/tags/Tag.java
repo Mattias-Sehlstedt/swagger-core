@@ -2,6 +2,7 @@ package io.swagger.v3.oas.models.tags;
 
 import io.swagger.v3.oas.models.annotations.OpenAPI31;
 import io.swagger.v3.oas.models.ExternalDocumentation;
+import io.swagger.v3.oas.models.internal.ExtensionUtils;
 
 import java.util.Objects;
 
@@ -100,7 +101,7 @@ public class Tag {
     }
 
     public void addExtension(String name, Object value) {
-        if (name == null || name.isEmpty() || !name.startsWith("x-")) {
+        if (!ExtensionUtils.isVendorExtension(name)) {
             return;
         }
         if (this.extensions == null) {
@@ -111,7 +112,7 @@ public class Tag {
 
     @OpenAPI31
     public void addExtension31(String name, Object value) {
-        if (name != null && (name.startsWith("x-oas-") || name.startsWith("x-oai-"))) {
+        if (ExtensionUtils.is31VendorExtension(name)) {
             return;
         }
         addExtension(name, value);

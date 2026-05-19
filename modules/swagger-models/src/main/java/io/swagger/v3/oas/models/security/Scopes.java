@@ -1,5 +1,7 @@
 package io.swagger.v3.oas.models.security;
 
+import io.swagger.v3.oas.models.internal.ExtensionUtils;
+
 import java.util.LinkedHashMap;
 import java.util.Objects;
 
@@ -51,7 +53,7 @@ public class Scopes extends LinkedHashMap<String, String> {
      */
     @Deprecated
     public void addExtension(String name, Object value) {
-        if (name == null || name.isEmpty() || !name.startsWith("x-")) {
+        if (!ExtensionUtils.isVendorExtension(name)) {
             return;
         }
         if (this.extensions == null) {

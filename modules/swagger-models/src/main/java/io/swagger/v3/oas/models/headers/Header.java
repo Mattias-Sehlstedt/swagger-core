@@ -1,5 +1,6 @@
 package io.swagger.v3.oas.models.headers;
 
+import io.swagger.v3.oas.models.internal.ExtensionUtils;
 import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.Schema;
@@ -258,7 +259,7 @@ public class Header {
     }
 
     public void addExtension(String name, Object value) {
-        if (name == null || name.isEmpty() || !name.startsWith("x-")) {
+        if (!ExtensionUtils.isVendorExtension(name)) {
             return;
         }
         if (this.extensions == null) {

@@ -7,6 +7,7 @@ import io.swagger.v3.oas.models.annotations.OpenAPI31;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.ExternalDocumentation;
 import io.swagger.v3.oas.models.SpecVersion;
+import io.swagger.v3.oas.models.internal.ExtensionUtils;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -2205,7 +2206,7 @@ public class Schema<T> {
     }
 
     public void addExtension(String name, Object value) {
-        if (name == null || name.isEmpty() || (specVersion == SpecVersion.V30 && !name.startsWith("x-"))) {
+        if (specVersion == SpecVersion.V30 && !ExtensionUtils.isVendorExtension(name)) {
             return;
         }
         if (this.extensions == null) {

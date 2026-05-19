@@ -429,7 +429,7 @@
                     <links>
                         <link>https://docs.oracle.com/javase/8/docs/api</link>
                     </links>
-                    <excludePackageNames/>
+                    <excludePackageNames>${javadoc.package.exclude}</excludePackageNames>
                 </configuration>
             </plugin>
             <plugin>
@@ -661,5 +661,6 @@
         <coverage.missed.classes>0</coverage.missed.classes>
         <transformer-maven-plugin-version>0.5.0</transformer-maven-plugin-version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <javadoc.package.exclude>*.internal:*.internal.*</javadoc.package.exclude>
     </properties>
 </project>
