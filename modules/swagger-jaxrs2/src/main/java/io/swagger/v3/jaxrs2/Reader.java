@@ -27,11 +27,7 @@ import io.swagger.v3.oas.integration.ContextUtils;
 import io.swagger.v3.oas.integration.SwaggerConfiguration;
 import io.swagger.v3.oas.integration.api.OpenAPIConfiguration;
 import io.swagger.v3.oas.integration.api.OpenApiReader;
-import io.swagger.v3.oas.models.Components;
-import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.Operation;
-import io.swagger.v3.oas.models.PathItem;
-import io.swagger.v3.oas.models.Paths;
+import io.swagger.v3.oas.models.*;
 import io.swagger.v3.oas.models.callbacks.Callback;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.Encoding;
@@ -99,6 +95,13 @@ public class Reader implements OpenApiReader {
     private static final String TRACE_METHOD = "trace";
     private static final String HEAD_METHOD = "head";
     private static final String OPTIONS_METHOD = "options";
+
+    /**
+     * The default version comes from field {@code openapi} when a new {@link OpenAPI} is created
+     */
+    private static final String DEFAULT_OAS_VERSION = "3.0";
+
+    private static final String OAS_3_1 = "3.1.0";
 
     public Reader() {
         this(new OpenAPI(), new Paths(), new LinkedHashSet<>(), new Components());
@@ -287,16 +290,14 @@ public class Reader implements OpenApiReader {
         Hidden hidden = cls.getAnnotation(Hidden.class);
         // class path
         final javax.ws.rs.Path apiPath = ReflectionUtils.getAnnotation(cls, javax.ws.rs.Path.class);
-        final boolean openapi31 = Boolean.TRUE.equals(config.isOpenAPI31());
+        final boolean openapi31 = SpecVersion.V31.equals(config.getSpecVersion());
 
-        if (
-                openapi31 &&
-                (
-                        config.getOpenAPI() == null ||
-                        config.getOpenAPI().getOpenapi() == null ||
-                        config.getOpenAPI().getOpenapi().startsWith("3.0")
-                ) && config.getOpenAPIVersion() == null) {
-            openAPI.setOpenapi("3.1.0");
+        final boolean missingOrDefaultOpenAPI = config.getOpenAPI() == null ||
+                                                config.getOpenAPI().getOpenapi() == null ||
+                                                config.getOpenAPI().getOpenapi().startsWith(DEFAULT_OAS_VERSION);
+
+        if (openapi31 && missingOrDefaultOpenAPI && config.getOpenAPIVersion() == null) {
+            openAPI.setOpenapi(OAS_3_1);
         }
 
         if (hidden != null) { //  || (apiPath == null && !isSubresource)) {

@@ -54,7 +54,7 @@ public class ModelConverters {
 
     public ModelConverters(Configuration configuration) {
         converters = new CopyOnWriteArrayList<>();
-        boolean openapi31 =configuration != null && configuration.isOpenAPI31() != null && configuration.isOpenAPI31();
+        boolean openapi31 = configuration != null && configuration.isOpenAPI31() != null && configuration.isOpenAPI31();
         if (openapi31) {
             converters.add(new ModelResolver(Json31.mapper()).configuration(configuration));
         } else {

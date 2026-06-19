@@ -30,6 +30,7 @@ import io.swagger.v3.oas.integration.api.OpenApiReader;
 import io.swagger.v3.oas.integration.api.OpenApiScanner;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Paths;
+import io.swagger.v3.oas.models.SpecVersion;
 import io.swagger.v3.oas.models.media.Schema;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -73,7 +74,7 @@ public class GenericOpenApiContext<T extends GenericOpenApiContext> implements O
     // -1 perpetual
     private long cacheTTL = -1;
 
-    private Boolean openAPI31;
+    private SpecVersion specVersion;
 
     private Boolean convertToOpenAPI31;
 
@@ -292,21 +293,21 @@ public class GenericOpenApiContext<T extends GenericOpenApiContext> implements O
      * @since 2.1.8
      */
     public Boolean isOpenAPI31() {
-        return openAPI31;
+        return SpecVersion.V31.equals(specVersion);
     }
 
     /**
      * @since 2.1.8
      */
-    public void setOpenAPI31(Boolean v) {
-        this.openAPI31 = openAPI31;
+    public void setOpenAPI31(Boolean openAPI31) {
+        this.specVersion = Boolean.TRUE.equals(openAPI31) ? SpecVersion.V31 : SpecVersion.V30;
     }
 
     /**
      * @since 2.1.8
      */
     public T openAPI31(Boolean openAPI31) {
-        this.openAPI31 = openAPI31;
+        this.specVersion = Boolean.TRUE.equals(openAPI31) ? SpecVersion.V31 : SpecVersion.V30;
         return (T) this;
     }
 
@@ -323,7 +324,7 @@ public class GenericOpenApiContext<T extends GenericOpenApiContext> implements O
     public void setConvertToOpenAPI31(Boolean convertToOpenAPI31) {
         this.convertToOpenAPI31 = convertToOpenAPI31;
         if (Boolean.TRUE.equals(convertToOpenAPI31)) {
-            this.openAPI31 = true;
+            this.specVersion = SpecVersion.V31;
         }
     }
 
@@ -514,7 +515,7 @@ public class GenericOpenApiContext<T extends GenericOpenApiContext> implements O
         if (openApiConfiguration == null) {
             openApiConfiguration = new SwaggerConfiguration().resourcePackages(resourcePackages).resourceClasses(resourceClasses);
             ((SwaggerConfiguration) openApiConfiguration).setId(id);
-            ((SwaggerConfiguration) openApiConfiguration).setOpenAPI31(openAPI31);
+            ((SwaggerConfiguration) openApiConfiguration).setOpenAPI31(SpecVersion.V31.equals(specVersion));
             ((SwaggerConfiguration) openApiConfiguration).setConvertToOpenAPI31(convertToOpenAPI31);
             if (schemaResolution != null) {
                 ((SwaggerConfiguration) openApiConfiguration).setSchemaResolution(schemaResolution);
@@ -541,14 +542,14 @@ public class GenericOpenApiContext<T extends GenericOpenApiContext> implements O
                 modelConverters = buildModelConverters(ContextUtils.deepCopy(openApiConfiguration));
             }
             if (outputJsonMapper == null) {
-                if (Boolean.TRUE.equals(openApiConfiguration.isOpenAPI31())) {
+                if (SpecVersion.V31.equals(openApiConfiguration.getSpecVersion())) {
                     outputJsonMapper = Json31.mapper().copy();
                 } else {
                     outputJsonMapper = Json.mapper().copy();
                 }
             }
             if (outputYamlMapper == null) {
-                if (Boolean.TRUE.equals(openApiConfiguration.isOpenAPI31())) {
+                if (SpecVersion.V31.equals(openApiConfiguration.getSpecVersion())) {
                     outputYamlMapper = Yaml31.mapper().copy();
                 } else {
                     outputYamlMapper = Yaml.mapper().copy();
@@ -559,7 +560,7 @@ public class GenericOpenApiContext<T extends GenericOpenApiContext> implements O
                 outputJsonMapper.configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true);
                 outputYamlMapper.configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true);
                 outputYamlMapper.configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true);
-                if (Boolean.TRUE.equals(openApiConfiguration.isOpenAPI31())) {
+                if (SpecVersion.V31.equals(openApiConfiguration.getSpecVersion())) {
                     outputJsonMapper.addMixIn(OpenAPI.class, SortedOpenAPIMixin31.class);
                     outputJsonMapper.addMixIn(Schema.class, SortedSchemaMixin31.class);
                     outputYamlMapper.addMixIn(OpenAPI.class, SortedOpenAPIMixin31.class);
@@ -581,7 +582,7 @@ public class GenericOpenApiContext<T extends GenericOpenApiContext> implements O
             if (objectMapperProcessor != null) {
                 ObjectMapper mapper = IntegrationObjectMapperFactory.createJson();
                 objectMapperProcessor.processJsonObjectMapper(mapper);
-                ModelConverters.getInstance(Boolean.TRUE.equals(openApiConfiguration.isOpenAPI31()), openApiConfiguration.getSchemaResolution()).addConverter(new ModelResolver(mapper));
+                ModelConverters.getInstance(SpecVersion.V31.equals(openApiConfiguration.getSpecVersion()), openApiConfiguration.getSchemaResolution()).addConverter(new ModelResolver(mapper));
 
                 objectMapperProcessor.processOutputJsonObjectMapper(outputJsonMapper);
                 objectMapperProcessor.processOutputYamlObjectMapper(outputYamlMapper);
@@ -594,7 +595,7 @@ public class GenericOpenApiContext<T extends GenericOpenApiContext> implements O
         try {
             if (modelConverters != null && !modelConverters.isEmpty()) {
                 for (ModelConverter converter: modelConverters) {
-                    ModelConverters.getInstance(Boolean.TRUE.equals(openApiConfiguration.isOpenAPI31())).addConverter(converter);
+                    ModelConverters.getInstance(SpecVersion.V31.equals(openApiConfiguration.getSpecVersion())).addConverter(converter);
                 }
             }
         } catch (Exception e) {
@@ -608,8 +609,8 @@ public class GenericOpenApiContext<T extends GenericOpenApiContext> implements O
         }
 
         // set openAPI31 if present in configuration
-        if (openApiConfiguration.isOpenAPI31() != null && this.openAPI31 == null) {
-            this.openAPI31 = openApiConfiguration.isOpenAPI31();
+        if (openApiConfiguration.isOpenAPI31() != null && this.specVersion == null) {
+            this.specVersion = Boolean.TRUE.equals(openApiConfiguration.isOpenAPI31()) ? SpecVersion.V31 : SpecVersion.V30;
         }
 
         if (openApiConfiguration.isConvertToOpenAPI31() != null && this.convertToOpenAPI31 == null) {

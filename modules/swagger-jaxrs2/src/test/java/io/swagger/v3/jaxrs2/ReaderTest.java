@@ -116,12 +116,7 @@ import io.swagger.v3.jaxrs2.resources.rs.ProcessTokenRestService;
 import io.swagger.v3.jaxrs2.resources.ticket3624.Service;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.integration.SwaggerConfiguration;
-import io.swagger.v3.oas.models.Components;
-import io.swagger.v3.oas.models.ExternalDocumentation;
-import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.Operation;
-import io.swagger.v3.oas.models.PathItem;
-import io.swagger.v3.oas.models.Paths;
+import io.swagger.v3.oas.models.*;
 import io.swagger.v3.oas.models.callbacks.Callback;
 import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.headers.Header;
@@ -3168,7 +3163,7 @@ public class ReaderTest {
 
     @Test(description = "Test ArraySchema implementation annotations")
     public void testArraySchemaImplementation() {
-        SwaggerConfiguration config = new SwaggerConfiguration().openAPI31(true).openAPI(new OpenAPI());
+        SwaggerConfiguration config = swaggerConfiguration31();
         Reader reader = new Reader(config);
 
         OpenAPI openAPI = reader.read(ArraySchemaImplementationResource.class);
@@ -3317,7 +3312,7 @@ public class ReaderTest {
 
     @Test
     public void testOas31Petstore() {
-        SwaggerConfiguration config = new SwaggerConfiguration().openAPI31(true).openAPI(new OpenAPI());
+        SwaggerConfiguration config = swaggerConfiguration31();
         Reader reader = new Reader(config);
 
         OpenAPI openAPI = reader.read(PetResource.class);
@@ -3610,7 +3605,7 @@ public class ReaderTest {
 
     @Test
     public void test31RefSiblings() {
-        SwaggerConfiguration config = new SwaggerConfiguration().openAPI31(true).openAPI(new OpenAPI());
+        SwaggerConfiguration config = swaggerConfiguration31();
         Reader reader = new Reader(config);
 
         OpenAPI openAPI = reader.read(TagResource.class);
@@ -3660,7 +3655,7 @@ public class ReaderTest {
 
     @Test
     public void testSiblings() {
-        Reader reader = new Reader(new SwaggerConfiguration().openAPI(new OpenAPI()).openAPI31(true));
+        Reader reader = new Reader(swaggerConfiguration31());
 
         OpenAPI openAPI = reader.read(SiblingsResource.class);
         String yaml = "openapi: 3.1.0\n" +
@@ -3696,7 +3691,7 @@ public class ReaderTest {
 
     @Test
     public void testSiblingsOnResource() {
-        Reader reader = new Reader(new SwaggerConfiguration().openAPI(new OpenAPI()).openAPI31(true));
+        Reader reader = new Reader(swaggerConfiguration31());
 
         OpenAPI openAPI = reader.read(SiblingsResourceSimple.class);
         String yaml = "openapi: 3.1.0\n" +
@@ -3734,7 +3729,7 @@ public class ReaderTest {
 
     @Test
     public void testSiblingsOnResourceResponse() {
-        Reader reader = new Reader(new SwaggerConfiguration().openAPI(new OpenAPI()).openAPI31(true));
+        Reader reader = new Reader(swaggerConfiguration31());
 
         OpenAPI openAPI = reader.read(SiblingsResourceResponse.class);
         String yaml = "openapi: 3.1.0\n" +
@@ -3782,7 +3777,7 @@ public class ReaderTest {
 
     @Test
     public void testSiblingsOnResourceRequestBody() {
-        Reader reader = new Reader(new SwaggerConfiguration().openAPI(new OpenAPI()).openAPI31(true));
+        Reader reader = new Reader(swaggerConfiguration31());
 
         OpenAPI openAPI = reader.read(SiblingsResourceRequestBody.class);
         String yaml = "openapi: 3.1.0\n" +
@@ -3827,7 +3822,7 @@ public class ReaderTest {
 
     @Test
     public void testSiblingsOnResourceRequestBodyMultiple() {
-        Reader reader = new Reader(new SwaggerConfiguration().openAPI(new OpenAPI()).openAPI31(true));
+        Reader reader = new Reader(swaggerConfiguration31());
 
         OpenAPI openAPI = reader.read(SiblingsResourceRequestBodyMultiple.class);
         String yaml = "openapi: 3.1.0\n" +
@@ -3903,7 +3898,7 @@ public class ReaderTest {
 
     @Test
     public void testSiblingsOnProperty() {
-        Reader reader = new Reader(new SwaggerConfiguration().openAPI(new OpenAPI()).openAPI31(true));
+        Reader reader = new Reader(swaggerConfiguration31());
         Set<Class<?>> classes = new HashSet<>(Arrays.asList(SiblingPropResource.class, WebHookResource.class));
         OpenAPI openAPI = reader.read(classes);
         String yaml = "openapi: 3.1.0\n" +
@@ -3992,7 +3987,7 @@ public class ReaderTest {
 
     @Test
     public void testMisc31() {
-        Reader reader = new Reader(new SwaggerConfiguration().openAPI(new OpenAPI()).openAPI31(true));
+        Reader reader = new Reader(swaggerConfiguration31());
         Set<Class<?>> classes = new HashSet<>(Arrays.asList(Misc31Resource.class));
         OpenAPI openAPI = reader.read(classes);
         String yaml = "openapi: 3.1.0\n" +
@@ -4167,7 +4162,7 @@ public class ReaderTest {
 
     @Test
     public void testParameterMaximumValue() {
-        Reader reader = new Reader(new SwaggerConfiguration().openAPI(new OpenAPI()).openAPI31(true));
+        Reader reader = new Reader(swaggerConfiguration31());
 
         OpenAPI openAPI = reader.read(ParameterMaximumValueResource.class);
         String yaml = "openapi: 3.1.0\n" +
@@ -5678,5 +5673,13 @@ public class ReaderTest {
         public boolean isOpenAPI31Filter() {
             return true;
         }
+    }
+
+    private SwaggerConfiguration swaggerConfiguration31() {
+        return new SwaggerConfiguration().openAPI31(true).openAPI(openAPI31());
+    }
+
+    private OpenAPI openAPI31() {
+        return new OpenAPI(SpecVersion.V31).openapi("3.1.0");
     }
 }

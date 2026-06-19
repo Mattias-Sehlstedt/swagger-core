@@ -54,26 +54,6 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>com.coderplus.maven.plugins</groupId>
-                <artifactId>copy-rename-maven-plugin</artifactId>
-                <version>1.0.1</version>
-                <executions>
-                    <execution>
-                        <id>copy-file</id>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>rename</goal>
-                        </goals>
-                        <configuration>
-                            <ignoreFileNotFoundOnIncremental>true</ignoreFileNotFoundOnIncremental>
-                            <overWrite>true</overWrite>
-                            <sourceFile>${project.basedir}/transformed/${project.artifactId}-${project.version}.maven-plugin</sourceFile>
-                            <destinationFile>${project.basedir}/transformed/${project.artifactId}-${project.version}.jar</destinationFile>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
                 <!-- keep 3.1.0 until root cause of error is identified. see https://issues.apache.org/jira/browse/MRESOURCES-265 -->
                 <version>3.1.0</version>
@@ -171,6 +151,36 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.coderplus.maven.plugins</groupId>
+                        <artifactId>copy-rename-maven-plugin</artifactId>
+                        <version>1.0.1</version>
+                        <executions>
+                            <execution>
+                                <id>copy-file</id>
+                                <phase>compile</phase>
+                                <goals>
+                                    <goal>rename</goal>
+                                </goals>
+                                <configuration>
+                                    <ignoreFileNotFoundOnIncremental>true</ignoreFileNotFoundOnIncremental>
+                                    <overWrite>true</overWrite>
+                                    <sourceFile>${project.basedir}/transformed/${project.artifactId}-${project.version}.maven-plugin</sourceFile>
+                                    <destinationFile>${project.basedir}/transformed/${project.artifactId}-${project.version}.jar</destinationFile>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
     <dependencies>
         <dependency>

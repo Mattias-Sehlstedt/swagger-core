@@ -2,6 +2,7 @@ package io.swagger.v3.core.util;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.SpecVersion;
 import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.Map;
@@ -35,7 +36,7 @@ public class Configuration {
     private OpenAPI openAPI;
     private Set<String> modelConverterClasses;
     private String objectMapperProcessorClass;
-    private Boolean openAPI31 = false;
+    private SpecVersion specVersion = SpecVersion.V30;
     private Schema.SchemaResolution schemaResolution = Schema.SchemaResolution.DEFAULT;
     private String openAPIVersion = "3.0.1";
     private GroupsValidationStrategy groupsValidationStrategy = GroupsValidationStrategy.DEFAULT;
@@ -94,15 +95,15 @@ public class Configuration {
     }
 
     public Boolean isOpenAPI31() {
-        return openAPI31;
+        return specVersion.equals(SpecVersion.V31);
     }
 
     public void setOpenAPI31(Boolean openAPI31) {
-        this.openAPI31 = openAPI31;
+        this.specVersion = Boolean.TRUE.equals(openAPI31) ? SpecVersion.V31 : SpecVersion.V30;
     }
 
     public Configuration openAPI31(Boolean openAPI31) {
-        this.openAPI31 = openAPI31;
+        this.specVersion = Boolean.TRUE.equals(openAPI31) ? SpecVersion.V31 : SpecVersion.V30;
         return this;
     }
 

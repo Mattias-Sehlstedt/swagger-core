@@ -3,6 +3,7 @@ package io.swagger.v3.oas.integration;
 import io.swagger.v3.core.util.Configuration;
 import io.swagger.v3.oas.integration.api.OpenAPIConfiguration;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.SpecVersion;
 import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.Collection;
@@ -38,7 +39,7 @@ public class SwaggerConfiguration implements OpenAPIConfiguration {
 
     private Boolean skipResolveAppPath;
 
-    private Boolean openAPI31 = false;
+    private SpecVersion specVersion = SpecVersion.V30;
 
     private Boolean convertToOpenAPI31;
 
@@ -342,21 +343,47 @@ public class SwaggerConfiguration implements OpenAPIConfiguration {
      * @since 2.1.9
      */
     public Boolean isOpenAPI31() {
-        return openAPI31;
+        return specVersion.equals(SpecVersion.V31);
     }
 
     /**
      * @since 2.1.9
      */
     public void setOpenAPI31(Boolean openAPI31) {
-        this.openAPI31 = openAPI31;
+        if (openAPI31) {
+            this.specVersion = SpecVersion.V31;
+        }
     }
 
     /**
      * @since 2.1.9
      */
     public SwaggerConfiguration openAPI31(Boolean openAPI31) {
-        this.openAPI31 = openAPI31;
+        if (openAPI31) {
+            this.specVersion = SpecVersion.V31;
+        }
+        return this;
+    }
+
+    /**
+     * @since 2.2.X
+     */
+    public SpecVersion getSpecVersion() {
+        return specVersion;
+    }
+
+    /**
+     * @since 2.2.X
+     */
+    public void setSpecVersion(SpecVersion version) {
+        this.specVersion = version;
+    }
+
+    /**
+     * @since 2.2.X
+     */
+    public SwaggerConfiguration specVersion(SpecVersion version) {
+        this.specVersion = version;
         return this;
     }
 
@@ -373,7 +400,7 @@ public class SwaggerConfiguration implements OpenAPIConfiguration {
     public void setConvertToOpenAPI31(Boolean convertToOpenAPI31) {
         this.convertToOpenAPI31 = convertToOpenAPI31;
         if (Boolean.TRUE.equals(convertToOpenAPI31)) {
-            this.openAPI31 = true;
+            this.specVersion = SpecVersion.V31;
         }
     }
 
