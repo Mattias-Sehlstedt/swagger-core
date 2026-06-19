@@ -34,12 +34,15 @@ import io.swagger.v3.core.jackson.mixin.OperationMixin;
 import io.swagger.v3.core.jackson.mixin.Schema31Mixin;
 import io.swagger.v3.core.jackson.mixin.SchemaConverterMixin;
 import io.swagger.v3.core.jackson.mixin.SchemaMixin;
+import io.swagger.v3.core.jackson.mixin.TagMixin;
+import io.swagger.v3.core.jackson.mixin.Tag32Mixin;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.ExternalDocumentation;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
+import io.swagger.v3.oas.models.SpecVersion;
 import io.swagger.v3.oas.models.callbacks.Callback;
 import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.headers.Header;
@@ -74,51 +77,67 @@ import java.util.Map;
 public class ObjectMapperFactory {
 
     public static ObjectMapper createJson(JsonFactory jsonFactory) {
-        return create(jsonFactory, false);
+        return create(jsonFactory, SpecVersion.V30);
     }
 
     public static ObjectMapper createJson() {
-        return create(null, false);
+        return create(null, SpecVersion.V30);
     }
 
     public static ObjectMapper createYaml(YAMLFactory yamlFactory) {
-        return create(yamlFactory, false);
+        return create(yamlFactory, SpecVersion.V30);
     }
 
     public static ObjectMapper createYaml() {
-        return createYaml(false);
+        return createYaml(SpecVersion.V30);
     }
 
-    public static ObjectMapper createYaml(boolean openapi31) {
+    public static ObjectMapper createYaml(SpecVersion oasVersion) {
         YAMLFactory factory = new YAMLFactory();
         factory.disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER);
         factory.enable(YAMLGenerator.Feature.MINIMIZE_QUOTES);
         factory.enable(YAMLGenerator.Feature.SPLIT_LINES);
         factory.enable(YAMLGenerator.Feature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS);
 
-        return create(factory, openapi31);
+        return create(factory, oasVersion);
     }
 
     public static ObjectMapper createJson31(JsonFactory jsonFactory) {
-        return create(jsonFactory, true);
+        return create(jsonFactory, SpecVersion.V31);
     }
 
     public static ObjectMapper createJson31() {
-        return create(null, true);
+        return create(null, SpecVersion.V31);
     }
 
     public static ObjectMapper createYaml31(YAMLFactory yamlFactory) {
-        return create(yamlFactory, true);
+        return create(yamlFactory, SpecVersion.V31);
     }
 
     public static ObjectMapper createYaml31() {
-        return createYaml(true);
+        return createYaml(SpecVersion.V31);
     }
 
-    public static ObjectMapper create(JsonFactory jsonFactory, boolean openapi31) {
+    public static ObjectMapper createJson32(JsonFactory jsonFactory) {
+        return create(jsonFactory, SpecVersion.V32);
+    }
+
+    public static ObjectMapper createJson32() {
+        return create(null, SpecVersion.V32);
+    }
+
+    public static ObjectMapper createYaml32(YAMLFactory yamlFactory) {
+        return create(yamlFactory, SpecVersion.V32);
+    }
+
+    public static ObjectMapper createYaml32() {
+        return createYaml(SpecVersion.V32);
+    }
+
+    public static ObjectMapper create(JsonFactory jsonFactory, SpecVersion specVersion) {
         ObjectMapper mapper = jsonFactory == null ? new ObjectMapper() : new ObjectMapper(jsonFactory);
 
-        if (!openapi31) {
+        if (specVersion.equals(SpecVersion.V30)) {
             // handle ref schema serialization skipping all other props
             mapper.registerModule(new SimpleModule() {
                 @Override
@@ -163,7 +182,7 @@ public class ObjectMapperFactory {
             });
         }
 
-        if (!openapi31) {
+        if (specVersion.equals(SpecVersion.V30)) {
             Module deserializerModule = new DeserializationModule();
             mapper.registerModule(deserializerModule);
         } else {
@@ -201,8 +220,7 @@ public class ObjectMapperFactory {
         sourceMixins.put(SecurityScheme.class, ExtensionsMixin.class);
         sourceMixins.put(Callback.class, ExtensionsMixin.class);
 
-
-        if (!openapi31) {
+        if (specVersion.equals(SpecVersion.V30)) {
             sourceMixins.put(Schema.class, SchemaMixin.class);
             sourceMixins.put(DateSchema.class, DateSchemaMixin.class);
             sourceMixins.put(Components.class, ComponentsMixin.class);
@@ -210,6 +228,7 @@ public class ObjectMapperFactory {
             sourceMixins.put(License.class, LicenseMixin.class);
             sourceMixins.put(OpenAPI.class, OpenAPIMixin.class);
             sourceMixins.put(Discriminator.class, DiscriminatorMixin.class);
+            sourceMixins.put(Tag.class, TagMixin.class);
         } else {
             sourceMixins.put(Info.class, ExtensionsMixin.class);
             sourceMixins.put(Schema.class, Schema31Mixin.class);
@@ -217,6 +236,11 @@ public class ObjectMapperFactory {
             sourceMixins.put(OpenAPI.class, OpenAPI31Mixin.class);
             sourceMixins.put(DateSchema.class, DateSchemaMixin.class);
             sourceMixins.put(Discriminator.class, Discriminator31Mixin.class);
+        }
+        if (specVersion.equals(SpecVersion.V32)) {
+            sourceMixins.put(Tag.class, Tag32Mixin.class);
+        } else {
+            sourceMixins.put(Tag.class, TagMixin.class);
         }
         mapper.setMixIns(sourceMixins);
         mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);

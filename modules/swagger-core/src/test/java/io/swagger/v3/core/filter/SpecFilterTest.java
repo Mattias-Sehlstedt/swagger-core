@@ -13,13 +13,16 @@ import io.swagger.v3.core.filter.resources.NoPetRefSchemaFilter;
 import io.swagger.v3.core.filter.resources.RemoveInternalParamsFilter;
 import io.swagger.v3.core.filter.resources.RemoveUnreferencedDefinitionsFilter;
 import io.swagger.v3.core.filter.resources.ReplaceGetOperationsFilter;
+import io.swagger.v3.core.filter.resources.NoSimpleFlightsOperationsFilter;
 import io.swagger.v3.core.matchers.SerializationMatchers;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.core.util.Json31;
+import io.swagger.v3.core.util.Json32;
 import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.core.util.Yaml31;
 import io.swagger.v3.core.util.ResourceUtils;
 import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.ExternalDocumentation;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
@@ -35,6 +38,8 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static org.testng.Assert.assertEquals;
@@ -56,6 +61,7 @@ public class SpecFilterTest {
     private static final String RESOURCE_PATH_LIST = "specFiles/3.1.0/list-3.1.json";
     private static final String RESOURCE_PATH_COMPOSED_SCHEMA = "specFiles/3.1.0/composed-schema-3.1.json";
     private static final String RESOURCE_REFERRED_SCHEMAS = "specFiles/petstore-3.0-referred-schemas.json";
+    private static final String TAGS_SCHEMAS = "specFiles/3.2.0/tag-3.2.json";
     private static final String RESOURCE_PATH_WITHOUT_MODELS = "specFiles/petstore-3.0-v2_withoutModels.json";
     private static final String RESOURCE_DEPRECATED_OPERATIONS = "specFiles/deprecatedoperationmodel.json";
     private static final String CHANGED_OPERATION_ID = "Changed Operation";
@@ -65,9 +71,31 @@ public class SpecFilterTest {
     private static final String QUERY = "query";
     private static final String PET_MODEL = "Pet";
     private static final String TAG_MODEL = "/Tag";
-    private static final String PET_TAG = "pet";
-    private static final String STORE_TAG = "store";
-    private static final String USER_TAG = "user";
+    private static final String PET_TAG_NAME = "pet";
+    private static final String STORE_TAG_NAME = "store";
+    private static final String USER_TAG_NAME = "user";
+    private static final String INTERNATIONAL_TAG_NAME = "international";
+    private static final String DOMESTIC_TAG_NAME = "domestic";
+    private static final String DELAYS_TAG_NAME = "delays";
+    private static final String NAV_TAG_KIND = "nav";
+    private static final Tag INTERNATIONAL_TAG = new Tag()
+            .name(INTERNATIONAL_TAG_NAME)
+            .summary("International")
+            .description("Flights that cross country borders")
+            .kind(NAV_TAG_KIND);
+    private static final Tag DOMESTIC_TAG = new Tag()
+            .name(DOMESTIC_TAG_NAME)
+            .summary("Domestic")
+            .description("Flights within a single country")
+            .kind(NAV_TAG_KIND);
+    private static final Tag DELAYS_TAG = new Tag()
+            .name(DELAYS_TAG_NAME)
+            .summary("Delays")
+            .description("Information about flight delays")
+            .kind("badge")
+            .externalDocs(new ExternalDocumentation()
+                    .description("Delay compensation policies")
+                    .url("https://docs.example.com/delay-policies"));
 
     @Test(description = "it should clone everything")
     public void cloneEverything() throws IOException {
@@ -418,8 +446,8 @@ public class SpecFilterTest {
         assertNotNull(filtered.getComponents().getSchemas().get("ReferredOrder"));
     }
 
-    @Test(description = "Clone should retain any 'deperecated' flags present on operations")
-    public void cloneRetainDeperecatedFlags() throws IOException {
+    @Test(description = "Clone should retain any 'deprecated' flags present on operations")
+    public void cloneRetainDeprecatedFlags() throws IOException {
         final OpenAPI openAPI = getOpenAPI(RESOURCE_DEPRECATED_OPERATIONS);
         final RemoveUnreferencedDefinitionsFilter remover = new RemoveUnreferencedDefinitionsFilter();
         final OpenAPI filtered = new SpecFilter().filter(openAPI, remover, null, null, null);
@@ -436,7 +464,7 @@ public class SpecFilterTest {
         final OpenAPI openAPI = getOpenAPI(RESOURCE_REFERRED_SCHEMAS);
         final NoOpOperationsFilter filter = new NoOpOperationsFilter();
         final OpenAPI filtered = new SpecFilter().filter(openAPI, filter, null, null, null);
-        assertEquals(getTagNames(filtered), Sets.newHashSet(PET_TAG, USER_TAG, STORE_TAG));
+        assertEquals(getTagNames(filtered), Sets.newHashSet(PET_TAG_NAME, USER_TAG_NAME, STORE_TAG_NAME));
     }
 
     @Test(description = "it should not contain user tags in the top level OpenAPI object")
@@ -444,8 +472,15 @@ public class SpecFilterTest {
         final OpenAPI openAPI = getOpenAPI(RESOURCE_REFERRED_SCHEMAS);
         final NoPetOperationsFilter filter = new NoPetOperationsFilter();
         final OpenAPI filtered = new SpecFilter().filter(openAPI, filter, null, null, null);
-        assertEquals(getTagNames(filtered), Sets.newHashSet(USER_TAG, STORE_TAG));
+        assertEquals(getTagNames(filtered), Sets.newHashSet(USER_TAG_NAME, STORE_TAG_NAME));
+    }
 
+    @Test(description = "a parent tag should be removed from a child tag if the operation defining the parent is filtered out")
+    public void shouldRemoveParentValueFromChildWhenParentIsRemovedWithFilter() throws IOException {
+        final OpenAPI openAPI = getOpenAPI32(TAGS_SCHEMAS);
+        final NoSimpleFlightsOperationsFilter filter = new NoSimpleFlightsOperationsFilter();
+        final OpenAPI filtered = new SpecFilter().filter(openAPI, filter, null, null, null);
+        assertEquals(filtered.getTags(), new ArrayList<>(Arrays.asList(INTERNATIONAL_TAG, DOMESTIC_TAG, DELAYS_TAG)));
     }
 
     @Test(description = "it should filter with null definitions")
@@ -482,7 +517,7 @@ public class SpecFilterTest {
         assertNull(filtered.getComponents().getSchemas().get("UnusedDefinition"));
     }
 
-    private Set getTagNames(OpenAPI openAPI) {
+    private Set<String> getTagNames(OpenAPI openAPI) {
         Set<String> result = new HashSet<>();
         if (openAPI.getTags() != null) {
             for (Tag item : openAPI.getTags()) {
@@ -500,6 +535,11 @@ public class SpecFilterTest {
     private OpenAPI getOpenAPI31(String path) throws IOException {
         final String json = ResourceUtils.loadClassResource(getClass(), path);
         return Json31.mapper().readValue(json, OpenAPI.class);
+    }
+
+    private OpenAPI getOpenAPI32(String path) throws IOException {
+        final String json = ResourceUtils.loadClassResource(getClass(), path);
+        return Json32.mapper().readValue(json, OpenAPI.class);
     }
 
     private OpenAPI getOpenAPIYaml(String path) throws IOException {

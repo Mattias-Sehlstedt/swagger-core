@@ -32,6 +32,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
+import io.swagger.v3.oas.models.SpecVersion;
 import io.swagger.v3.oas.models.callbacks.Callback;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.Encoding;
@@ -73,6 +74,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.CompletionStage;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class Reader implements OpenApiReader {
@@ -99,6 +101,8 @@ public class Reader implements OpenApiReader {
     private static final String TRACE_METHOD = "trace";
     private static final String HEAD_METHOD = "head";
     private static final String OPTIONS_METHOD = "options";
+    private static final String OAS_31 = "3.1.0";
+    private static final String OAS_32 = "3.2.0";
 
     public Reader() {
         this(new OpenAPI(), new Paths(), new LinkedHashSet<>(), new Components());
@@ -288,15 +292,16 @@ public class Reader implements OpenApiReader {
         // class path
         final javax.ws.rs.Path apiPath = ReflectionUtils.getAnnotation(cls, javax.ws.rs.Path.class);
         final boolean openapi31 = Boolean.TRUE.equals(config.isOpenAPI31());
+        final boolean openapi32 = SpecVersion.V32.equals(config.getSpecVersion());
 
-        if (
-                openapi31 &&
-                (
-                        config.getOpenAPI() == null ||
-                        config.getOpenAPI().getOpenapi() == null ||
-                        config.getOpenAPI().getOpenapi().startsWith("3.0")
-                ) && config.getOpenAPIVersion() == null) {
-            openAPI.setOpenapi("3.1.0");
+        final boolean noExplicitVersionOrOAS30 = config.getOpenAPI() == null ||
+                              config.getOpenAPI().getOpenapi() == null ||
+                              config.getOpenAPI().getOpenapi().startsWith("3.0");
+        if (openapi32) {
+            openAPI.setOpenapi(OAS_32);
+        }
+        if (openapi31 && noExplicitVersionOrOAS30 && config.getOpenAPIVersion() == null) {
+            openAPI.setOpenapi(OAS_31);
         }
 
         if (hidden != null) { //  || (apiPath == null && !isSubresource)) {
@@ -340,7 +345,7 @@ public class Reader implements OpenApiReader {
 
             // OpenApiDefinition tags
             AnnotationsUtils
-                    .getTags(openAPIDefinition.tags(), false)
+                    .getTags(openAPIDefinition.tags(), false, openapi32)
                     .ifPresent(tags -> openApiTags.addAll(tags));
 
             // OpenApiDefinition servers
@@ -387,7 +392,7 @@ public class Reader implements OpenApiReader {
         final Set<String> classTags = new LinkedHashSet<>();
         if (apiTags != null) {
             AnnotationsUtils
-                    .getTags(apiTags, false).ifPresent(tags ->
+                    .getTags(apiTags, false, openapi32).ifPresent(tags ->
                     tags
                             .stream()
                             .map(Tag::getName)
@@ -526,7 +531,8 @@ public class Reader implements OpenApiReader {
                         parentResponses,
                         jsonViewAnnotation,
                         classResponses,
-                        annotatedMethod);
+                        annotatedMethod,
+                        openapi32);
                 if (operation != null) {
 
                     if (classDeprecated || methodDeprecated) {
@@ -713,7 +719,7 @@ public class Reader implements OpenApiReader {
 
         // add tags from class to definition tags
         AnnotationsUtils
-                .getTags(apiTags, true).ifPresent(tags -> openApiTags.addAll(tags));
+                .getTags(apiTags, true, openapi32).ifPresent(tags -> openApiTags.addAll(tags));
 
         if (!openApiTags.isEmpty()) {
             Set<Tag> tagsSet = new LinkedHashSet<>();
@@ -887,7 +893,8 @@ public class Reader implements OpenApiReader {
     public Operation parseMethod(
             Method method,
             List<Parameter> globalParameters,
-            JsonView jsonViewAnnotation) {
+            JsonView jsonViewAnnotation,
+            boolean openapi32) {
         JavaType classType = TypeFactory.defaultInstance().constructType(method.getDeclaringClass());
         return parseMethod(
                 classType.getClass(),
@@ -906,44 +913,8 @@ public class Reader implements OpenApiReader {
                 null,
                 jsonViewAnnotation,
                 null,
-                null);
-    }
-
-    public Operation parseMethod(
-            Method method,
-            List<Parameter> globalParameters,
-            Produces methodProduces,
-            Produces classProduces,
-            Consumes methodConsumes,
-            Consumes classConsumes,
-            List<SecurityRequirement> classSecurityRequirements,
-            Optional<io.swagger.v3.oas.models.ExternalDocumentation> classExternalDocs,
-            Set<String> classTags,
-            List<io.swagger.v3.oas.models.servers.Server> classServers,
-            boolean isSubresource,
-            RequestBody parentRequestBody,
-            ApiResponses parentResponses,
-            JsonView jsonViewAnnotation,
-            io.swagger.v3.oas.annotations.responses.ApiResponse[] classResponses) {
-        JavaType classType = TypeFactory.defaultInstance().constructType(method.getDeclaringClass());
-        return parseMethod(
-                classType.getClass(),
-                method,
-                globalParameters,
-                methodProduces,
-                classProduces,
-                methodConsumes,
-                classConsumes,
-                classSecurityRequirements,
-                classExternalDocs,
-                classTags,
-                classServers,
-                isSubresource,
-                parentRequestBody,
-                parentResponses,
-                jsonViewAnnotation,
-                classResponses,
-                null);
+                null,
+                openapi32);
     }
 
     public Operation parseMethod(
@@ -962,7 +933,7 @@ public class Reader implements OpenApiReader {
             ApiResponses parentResponses,
             JsonView jsonViewAnnotation,
             io.swagger.v3.oas.annotations.responses.ApiResponse[] classResponses,
-            AnnotatedMethod annotatedMethod) {
+            boolean openapi32) {
         JavaType classType = TypeFactory.defaultInstance().constructType(method.getDeclaringClass());
         return parseMethod(
                 classType.getClass(),
@@ -981,7 +952,48 @@ public class Reader implements OpenApiReader {
                 parentResponses,
                 jsonViewAnnotation,
                 classResponses,
-                annotatedMethod);
+                null,
+                openapi32);
+    }
+
+    public Operation parseMethod(
+            Method method,
+            List<Parameter> globalParameters,
+            Produces methodProduces,
+            Produces classProduces,
+            Consumes methodConsumes,
+            Consumes classConsumes,
+            List<SecurityRequirement> classSecurityRequirements,
+            Optional<io.swagger.v3.oas.models.ExternalDocumentation> classExternalDocs,
+            Set<String> classTags,
+            List<io.swagger.v3.oas.models.servers.Server> classServers,
+            boolean isSubresource,
+            RequestBody parentRequestBody,
+            ApiResponses parentResponses,
+            JsonView jsonViewAnnotation,
+            io.swagger.v3.oas.annotations.responses.ApiResponse[] classResponses,
+            AnnotatedMethod annotatedMethod,
+            boolean openapi32) {
+        JavaType classType = TypeFactory.defaultInstance().constructType(method.getDeclaringClass());
+        return parseMethod(
+                classType.getClass(),
+                method,
+                globalParameters,
+                methodProduces,
+                classProduces,
+                methodConsumes,
+                classConsumes,
+                classSecurityRequirements,
+                classExternalDocs,
+                classTags,
+                classServers,
+                isSubresource,
+                parentRequestBody,
+                parentResponses,
+                jsonViewAnnotation,
+                classResponses,
+                annotatedMethod,
+                openapi32);
     }
 
     protected Operation parseMethod(
@@ -1001,7 +1013,8 @@ public class Reader implements OpenApiReader {
             ApiResponses parentResponses,
             JsonView jsonViewAnnotation,
             io.swagger.v3.oas.annotations.responses.ApiResponse[] classResponses,
-            AnnotatedMethod annotatedMethod) {
+            AnnotatedMethod annotatedMethod,
+            boolean openapi32) {
         Operation operation = new Operation();
 
         io.swagger.v3.oas.annotations.Operation apiOperation = ReflectionUtils.getAnnotation(method, io.swagger.v3.oas.annotations.Operation.class);
@@ -1058,13 +1071,17 @@ public class Reader implements OpenApiReader {
         // external docs
         AnnotationsUtils.getExternalDocumentation(apiExternalDocumentation).ifPresent(operation::setExternalDocs);
 
+        Predicate<io.swagger.v3.oas.annotations.tags.Tag> isTagAlreadyDefined =
+                t -> operation.getTags() != null && operation.getTags().contains(t.name());
+
         // method tags
         if (apiTags != null) {
             apiTags.stream()
-                    .filter(t -> operation.getTags() == null || (operation.getTags() != null && !operation.getTags().contains(t.name())))
+                    .filter(t -> !isTagAlreadyDefined.test(t))
                     .map(io.swagger.v3.oas.annotations.tags.Tag::name)
                     .forEach(operation::addTagsItem);
-            AnnotationsUtils.getTags(apiTags.toArray(new io.swagger.v3.oas.annotations.tags.Tag[apiTags.size()]), true).ifPresent(tags -> openApiTags.addAll(tags));
+            AnnotationsUtils.getTags(apiTags.toArray(new io.swagger.v3.oas.annotations.tags.Tag[apiTags.size()]), true, openapi32)
+                    .ifPresent(tags -> openApiTags.addAll(tags));
         }
 
         // parameters
