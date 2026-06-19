@@ -1098,7 +1098,7 @@ public abstract class AnnotationsUtils {
         return getArraySchema(arrayAnnotation, components, null, openapi31, existingSchemaObject);
     }
 
-    public static Optional<Set<Tag>> getTags(io.swagger.v3.oas.annotations.tags.Tag[] tags, boolean skipOnlyName) {
+    public static Optional<Set<Tag>> getTags(io.swagger.v3.oas.annotations.tags.Tag[] tags, boolean skipOnlyName, boolean openapi32) {
         if (tags == null) {
             return Optional.empty();
         }
@@ -1107,15 +1107,24 @@ public abstract class AnnotationsUtils {
             if (StringUtils.isBlank(tag.name())) {
                 continue;
             }
-            if (skipOnlyName &&
-                    StringUtils.isBlank(tag.description()) &&
-                    StringUtils.isBlank(tag.externalDocs().description()) &&
-                    StringUtils.isBlank(tag.externalDocs().url())) {
+            boolean hasNoOtherFieldThanName = StringUtils.isBlank(tag.description()) &&
+                                              StringUtils.isBlank(tag.externalDocs().description()) &&
+                                              StringUtils.isBlank(tag.externalDocs().url());
+            if (openapi32) {
+                hasNoOtherFieldThanName = hasNoOtherFieldThanName &&
+                                          StringUtils.isBlank(tag.parent()) &&
+                                          StringUtils.isBlank(tag.kind()) &&
+                                          StringUtils.isBlank(tag.summary());
+            }
+            if (skipOnlyName && hasNoOtherFieldThanName) {
                 continue;
             }
             Tag tagObject = new Tag();
             if (StringUtils.isNotBlank(tag.description())) {
                 tagObject.setDescription(tag.description());
+            }
+            if (StringUtils.isNotBlank(tag.summary())) {
+                tagObject.setSummary(tag.summary());
             }
             tagObject.setName(tag.name());
             getExternalDocumentation(tag.externalDocs()).ifPresent(tagObject::setExternalDocs);
@@ -1124,6 +1133,12 @@ public abstract class AnnotationsUtils {
                 if (extensions != null) {
                     extensions.forEach(tagObject::addExtension);
                 }
+            }
+            if (StringUtils.isNotBlank(tag.parent())) {
+                tagObject.setParent(tag.parent());
+            }
+            if (StringUtils.isNotBlank(tag.kind())) {
+                tagObject.setKind(tag.kind());
             }
             tagsList.add(tagObject);
         }

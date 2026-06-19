@@ -2,6 +2,7 @@ package io.swagger.v3.oas.integration.api;
 
 import io.swagger.v3.core.util.Configuration;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.SpecVersion;
 import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.Collection;
@@ -60,6 +61,11 @@ public interface OpenAPIConfiguration {
      * @since 2.2.12
      */
     Boolean isOpenAPI31();
+
+    /**
+     * @since 2.2.X
+     */
+    SpecVersion getSpecVersion();
 
     /**
      * @since 2.2.12

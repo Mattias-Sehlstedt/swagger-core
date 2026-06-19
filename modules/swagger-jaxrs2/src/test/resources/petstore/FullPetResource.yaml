@@ -40,6 +40,8 @@ tags:
   description: desc
   externalDocs:
     description: docs desc
+- name: Second Tag
+  description: desc class
 - name: Fifth Tag Full
   description: desc class
   externalDocs:

@@ -1,6 +1,7 @@
 package io.swagger.v3.oas.annotations.tags;
 
 import io.swagger.v3.oas.annotations.ExternalDocumentation;
+import io.swagger.v3.oas.annotations.OpenAPI32;
 import io.swagger.v3.oas.annotations.extensions.Extension;
 
 import java.lang.annotation.Inherited;
@@ -21,7 +22,8 @@ import static java.lang.annotation.ElementType.METHOD;
  * if additional fields are also defined, like description or externalDocs, the Tag will also be added to openAPI.tags
  * field</p>
  *
- * @see <a target="_new" href="https://github.com/OAI/OpenAPI-Specification/blob/3.0.4/versions/3.0.4.md#tag-object">Tag (OpenAPI specification)</a>
+ * @see <a href="https://github.com/OAI/OpenAPI-Specification/blob/3.0.4/versions/3.0.4.md#tag-object">Tag (OpenAPI 3.0 specification)</a>
+ * @see <a href="https://github.com/OAI/OpenAPI-Specification/blob/3.2.0/versions/3.2.0.md#tag-object">Tag (OpenAPI 3.2 specification)</a>
  * @see io.swagger.v3.oas.annotations.OpenAPIDefinition
  **/
 @Target({METHOD, TYPE, ANNOTATION_TYPE})
@@ -36,6 +38,15 @@ public @interface Tag {
      * @return the name of this tag
      */
     String name();
+
+    /**
+     * A short summary of the tag, used for display purposes.
+     *
+     * @since 2.2.X / OpenAPI 3.2
+     * @return the summary
+     */
+    @OpenAPI32
+    String summary() default "";
 
     /**
      * A short description for this tag.
@@ -57,4 +68,25 @@ public @interface Tag {
      * @return an optional array of extensions
      */
     Extension[] extensions() default {};
+
+    /**
+     * The name of a tag that this tag is nested under.
+     * The named tag MUST exist in the API description, and circular references between parent and child tags MUST NOT be used.
+     *
+     * @since 2.2.X / OpenAPI 3.2
+     * @return the parent tag
+     */
+    @OpenAPI32
+    String parent() default "";
+
+    /**
+     * A machine-readable string to categorize what sort of tag it is. Any string value can be used;
+     * common uses are {@code nav} for Navigation, {@code badge} for visible badges, {@code audience} for APIs used by different groups.
+     * @see <a href="https://spec.openapis.org/registry/tag-kind/index.html">Tag Kinds Registry</a>
+     *
+     * @since 2.2.X / OpenAPI 3.2
+     * @return the kind
+     */
+    @OpenAPI32
+    String kind() default "";
 }

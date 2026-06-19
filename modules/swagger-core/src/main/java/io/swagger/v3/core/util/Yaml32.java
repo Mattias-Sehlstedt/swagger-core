@@ -10,13 +10,13 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
-public class Yaml31 {
+public class Yaml32 {
 
     private static final class ObjectMapperHolder {
-        private static final ObjectMapper MAPPER = ObjectMapperFactory.createYaml31();
+        private static final ObjectMapper MAPPER = ObjectMapperFactory.createYaml32();
     }
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(Yaml31.class);
+    
+    private static final Logger LOGGER = LoggerFactory.getLogger(Yaml32.class);
 
     public static ObjectMapper mapper() {
         return ObjectMapperHolder.MAPPER;
@@ -30,7 +30,7 @@ public class Yaml31 {
         try {
             return pretty().writeValueAsString(o);
         } catch (Exception e) {
-            PrettyPrintHelper.emitError(LOGGER, "Error serializing object to YAML (3.1)", e);
+            PrettyPrintHelper.emitError(LOGGER, "Error serializing object to YAML (3.2)", e);
             return null;
         }
     }
@@ -40,7 +40,7 @@ public class Yaml31 {
             String prettyString = pretty().writeValueAsString(o);
             PrettyPrintHelper.emit(LOGGER, prettyString);
         } catch (Exception e) {
-            PrettyPrintHelper.emitError(LOGGER, "Error pretty-printing YAML (3.1)", e);
+            PrettyPrintHelper.emitError(LOGGER, "Error pretty-printing YAML (3.2)", e);
         }
     }
 

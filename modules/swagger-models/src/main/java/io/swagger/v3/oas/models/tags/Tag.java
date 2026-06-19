@@ -2,21 +2,38 @@ package io.swagger.v3.oas.models.tags;
 
 import io.swagger.v3.oas.models.annotations.OpenAPI31;
 import io.swagger.v3.oas.models.ExternalDocumentation;
+import io.swagger.v3.oas.models.annotations.OpenAPI32;
 
 import java.util.Objects;
 
 /**
  * Tag
  *
- * @see "https://github.com/OAI/OpenAPI-Specification/blob/3.0.4/versions/3.0.4.md#tag-object"
- * @see "https://github.com/OAI/OpenAPI-Specification/blob/3.1.1/versions/3.1.1.md#tag-object"
+ * @see <a href="https://github.com/OAI/OpenAPI-Specification/blob/3.0.4/versions/3.0.4.md#tag-object">Tag (OpenAPI 3.0 specification)</a>
+ * @see <a href="https://github.com/OAI/OpenAPI-Specification/blob/3.1.1/versions/3.1.1.md#tag-object">Tag (OpenAPI 3.1 specification)</a>
+ * @see <a href="https://github.com/OAI/OpenAPI-Specification/blob/3.2.0/versions/3.2.0.md#tag-object">Tag (OpenAPI 3.2 specification)</a>
  */
 
 public class Tag {
     private String name = null;
+    /**
+     * @since 2.2.X (OpenAPI 3.2.0)
+     */
+    @OpenAPI32
+    private String summary = null;
     private String description = null;
     private ExternalDocumentation externalDocs = null;
     private java.util.Map<String, Object> extensions = null;
+    /**
+     * @since 2.2.X (OpenAPI 3.2.0)
+     */
+    @OpenAPI32
+    private String parent = null;
+    /**
+     * @since 2.2.X (OpenAPI 3.2.0)
+     */
+    @OpenAPI32
+    private String kind = null;
 
     /**
      * returns the name property from a Tag instance.
@@ -34,6 +51,34 @@ public class Tag {
 
     public Tag name(String name) {
         this.name = name;
+        return this;
+    }
+
+    /**
+     * returns the summary property from a Tag instance.
+     *
+     * @since 2.2.X (OpenAPI 3.2.0)
+     * @return String summary
+     **/
+    @OpenAPI32
+    public String getSummary() {
+        return summary;
+    }
+
+    /**
+     * @since 2.2.X (OpenAPI 3.2.0)
+     */
+    @OpenAPI32
+    public void setSummary(String summary) {
+        this.summary = summary;
+    }
+
+    /**
+     * @since 2.2.X (OpenAPI 3.2.0)
+     */
+    @OpenAPI32
+    public Tag summary(String summary) {
+        this.summary = summary;
         return this;
     }
 
@@ -85,14 +130,17 @@ public class Tag {
         }
         Tag tag = (Tag) o;
         return Objects.equals(this.name, tag.name) &&
+                Objects.equals(this.summary, tag.summary) &&
                 Objects.equals(this.description, tag.description) &&
                 Objects.equals(this.externalDocs, tag.externalDocs) &&
-                Objects.equals(this.extensions, tag.extensions);
+                Objects.equals(this.extensions, tag.extensions) &&
+                Objects.equals(this.parent, tag.parent) &&
+                Objects.equals(this.kind, tag.kind);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, description, externalDocs, extensions);
+        return Objects.hash(name, summary, description, externalDocs, extensions, parent, kind);
     }
 
     public java.util.Map<String, Object> getExtensions() {
@@ -126,14 +174,72 @@ public class Tag {
         return this;
     }
 
+    /**
+     * returns the parent property from a Tag instance.
+     *
+     * @since 2.2.X (OpenAPI 3.2.0)
+     * @return String parent
+     **/
+    @OpenAPI32
+    public String getParent() {
+        return parent;
+    }
+
+    /**
+     * @since 2.2.X (OpenAPI 3.2.0)
+     */
+    @OpenAPI32
+    public void setParent(String parent) {
+        this.parent = parent;
+    }
+
+    /**
+     * @since 2.2.X (OpenAPI 3.2.0)
+     */
+    @OpenAPI32
+    public Tag parent(String parent) {
+        this.parent = parent;
+        return this;
+    }
+
+    /**
+     * returns the kind property from a Tag instance.
+     *
+     * @since 2.2.X (OpenAPI 3.2.0)
+     * @return String kind
+     **/
+    @OpenAPI32
+    public String getKind() {
+        return kind;
+    }
+
+    /**
+     * @since 2.2.X (OpenAPI 3.2.0)
+     */
+    @OpenAPI32
+    public void setKind(String kind) {
+        this.kind = kind;
+    }
+
+    /**
+     * @since 2.2.X (OpenAPI 3.2.0)
+     */
+    @OpenAPI32
+    public Tag kind(String kind) {
+        this.kind = kind;
+        return this;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("class Tag {\n");
-
         sb.append("    name: ").append(toIndentedString(name)).append("\n");
+        sb.append("    summary: ").append(toIndentedString(summary)).append("\n");
         sb.append("    description: ").append(toIndentedString(description)).append("\n");
         sb.append("    externalDocs: ").append(toIndentedString(externalDocs)).append("\n");
+        sb.append("    parent: ").append(toIndentedString(parent)).append("\n");
+        sb.append("    kind: ").append(toIndentedString(kind)).append("\n");
         sb.append("}");
         return sb.toString();
     }
@@ -148,6 +254,5 @@ public class Tag {
         }
         return o.toString().replace("\n", "\n    ");
     }
-
 }
 

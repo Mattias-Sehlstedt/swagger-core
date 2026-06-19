@@ -7,6 +7,7 @@ import io.swagger.v3.jaxrs2.Reader;
 import io.swagger.v3.jaxrs2.matchers.SerializationMatchers;
 import io.swagger.v3.oas.integration.SwaggerConfiguration;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.SpecVersion;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,5 +77,13 @@ public abstract class AbstractAnnotationTest {
                 .openAPI31(true));
         OpenAPI openAPI = reader.read(cls);
         SerializationMatchers.assertEqualsToYaml31(openAPI, yaml);
+    }
+
+    public void compareAsYamlOAS32(final Class<?> cls, final String yaml) throws IOException {
+        Reader reader = new Reader(new SwaggerConfiguration()
+                .openAPI(new OpenAPI())
+                .specVersion(SpecVersion.V32));
+        OpenAPI openAPI = reader.read(cls);
+        SerializationMatchers.assertEqualsToYaml32(openAPI, yaml);
     }
 }

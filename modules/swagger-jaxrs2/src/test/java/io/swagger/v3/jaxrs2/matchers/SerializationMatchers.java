@@ -7,8 +7,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.core.util.Json31;
+import io.swagger.v3.core.util.Json32;
 import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.core.util.Yaml31;
+import io.swagger.v3.core.util.Yaml32;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.IOException;
@@ -39,6 +41,14 @@ public class SerializationMatchers {
         apply31(objectToSerialize, jsonStr, Json31.mapper());
     }
 
+    public static void assertEqualsToYaml32(Object objectToSerialize, String yamlStr) {
+        apply32(objectToSerialize, yamlStr, Yaml32.mapper());
+    }
+
+    public static void assertEqualsToJson32(Object objectToSerialize, String jsonStr) {
+        apply32(objectToSerialize, jsonStr, Json32.mapper());
+    }
+
     private static void apply(Object objectToSerialize, String str, ObjectMapper mapper, boolean exactMatch) {
         final ObjectNode lhs = mapper.convertValue(objectToSerialize, ObjectNode.class);
         ObjectNode rhs = null;
@@ -63,6 +73,19 @@ public class SerializationMatchers {
         }
         if (!lhs.equals(new ObjectNodeComparator(), rhs)) {
             assertEquals(Yaml31.pretty(lhs), Yaml31.pretty(rhs));
+        }
+    }
+
+    private static void apply32(Object objectToSerialize, String str, ObjectMapper mapper) {
+        final ObjectNode lhs = mapper.convertValue(objectToSerialize, ObjectNode.class);
+        ObjectNode rhs = null;
+        try {
+            rhs = mapper.readValue(str, ObjectNode.class);
+        } catch (IOException e) {
+            LOGGER.error("Failed to read value", e);
+        }
+        if (!lhs.equals(new ObjectNodeComparator(), rhs)) {
+            assertEquals(Yaml32.pretty(lhs), Yaml32.pretty(rhs));
         }
     }
 

@@ -69,6 +69,7 @@ import io.swagger.v3.jaxrs2.resources.SimpleRequestBodyResource;
 import io.swagger.v3.jaxrs2.resources.SimpleResponsesResource;
 import io.swagger.v3.jaxrs2.resources.SubResourceHead;
 import io.swagger.v3.jaxrs2.resources.TagsResource;
+import io.swagger.v3.jaxrs2.resources.TagsResourceWithAndWithoutDescription;
 import io.swagger.v3.jaxrs2.resources.Test2607;
 import io.swagger.v3.jaxrs2.resources.TestResource;
 import io.swagger.v3.jaxrs2.resources.Ticket2340Resource;
@@ -122,6 +123,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
+import io.swagger.v3.oas.models.SpecVersion;
 import io.swagger.v3.oas.models.callbacks.Callback;
 import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.headers.Header;
@@ -173,7 +175,9 @@ import static org.testng.Assert.assertTrue;
  */
 public class ReaderTest {
     private static final String EXAMPLE_TAG = "Example Tag";
+    private static final String FIRST_TAG = "First Tag";
     private static final String SECOND_TAG = "Second Tag";
+    private static final String THIRD_TAG = "Third Tag";
     private static final String OPERATION_SUMMARY = "Operation Summary";
     private static final String OPERATION_DESCRIPTION = "Operation Description";
     private static final String CALLBACK_POST_OPERATION_DESCRIPTION = "payload data will be sent";
@@ -249,7 +253,7 @@ public class ReaderTest {
         Method[] methods = SimpleMethods.class.getMethods();
         for (final Method method : methods) {
             if (isValidRestPath(method)) {
-                Operation operation = reader.parseMethod(method, null, null);
+                Operation operation = reader.parseMethod(method, null, null, false);
                 assertNotNull(operation);
             }
         }
@@ -259,7 +263,7 @@ public class ReaderTest {
     public void testGetSummaryAndDescription() {
         Reader reader = new Reader(new OpenAPI());
         Method[] methods = BasicFieldsResource.class.getMethods();
-        Operation operation = reader.parseMethod(methods[0], null, null);
+        Operation operation = reader.parseMethod(methods[0], null, null, false);
         assertNotNull(operation);
         assertEquals(OPERATION_SUMMARY, operation.getSummary());
         assertEquals(OPERATION_DESCRIPTION, operation.getDescription());
@@ -331,7 +335,7 @@ public class ReaderTest {
     public void testDeprecatedMethod() {
         Reader reader = new Reader(new OpenAPI());
         Method[] methods = DeprecatedFieldsResource.class.getMethods();
-        Operation deprecatedOperation = reader.parseMethod(methods[0], null, null);
+        Operation deprecatedOperation = reader.parseMethod(methods[0], null, null, false);
         assertNotNull(deprecatedOperation);
         assertTrue(deprecatedOperation.getDeprecated());
     }
@@ -342,11 +346,43 @@ public class ReaderTest {
         OpenAPI openAPI = reader.read(TagsResource.class);
         Operation operation = openAPI.getPaths().get("/").getGet();
         assertNotNull(operation);
-        assertEquals(6, operation.getTags().size());
+        assertEquals(operation.getTags().size(), 6);
         assertEquals(operation.getTags().get(3), EXAMPLE_TAG);
         assertEquals(operation.getTags().get(1), SECOND_TAG);
         assertEquals(openAPI.getTags().get(1).getDescription(), "desc definition");
         assertEquals(openAPI.getTags().get(2).getExternalDocs().getDescription(), "docs desc");
+    }
+
+    @Test(description = "Tags that have more information than a name should also be placed at top level")
+    public void testTagElevation() {
+        Reader reader = new Reader(new OpenAPI());
+        OpenAPI openAPI = reader.read(TagsResourceWithAndWithoutDescription.class);
+        Operation operation = openAPI.getPaths().get("/").getGet();
+        assertNotNull(operation);
+        assertEquals(operation.getTags().size(), 3);
+        assertEquals(operation.getTags().get(0), FIRST_TAG);
+        assertEquals(operation.getTags().get(1), SECOND_TAG);
+        assertEquals(operation.getTags().get(2), THIRD_TAG);
+        assertEquals(openAPI.getTags().size(), 1);
+        assertEquals(openAPI.getTags().get(0).getName(), FIRST_TAG);
+        assertEquals(openAPI.getTags().get(0).getDescription(), "desc");
+    }
+
+    @Test(description = "Tags that have more information than a name should also be placed at top level")
+    public void testTagElevationOAS32() {
+        Reader reader = new Reader(new SwaggerConfiguration().specVersion(SpecVersion.V32));
+        OpenAPI openAPI = reader.read(TagsResourceWithAndWithoutDescription.class);
+        Operation operation = openAPI.getPaths().get("/").getGet();
+        assertNotNull(operation);
+        assertEquals(operation.getTags().size(), 3);
+        assertEquals(operation.getTags().get(0), FIRST_TAG);
+        assertEquals(operation.getTags().get(1), SECOND_TAG);
+        assertEquals(operation.getTags().get(2), THIRD_TAG);
+        assertEquals(openAPI.getTags().size(), 2);
+        assertEquals(openAPI.getTags().get(0).getName(), FIRST_TAG);
+        assertEquals(openAPI.getTags().get(0).getDescription(), "desc");
+        assertEquals(openAPI.getTags().get(1).getName(), THIRD_TAG);
+        assertEquals(openAPI.getTags().get(1).getKind(), "kind");
     }
 
     @Test(description = "Get servers")
@@ -355,7 +391,7 @@ public class ReaderTest {
         OpenAPI openAPI = reader.read(ServersResource.class);
         Operation operation = openAPI.getPaths().get("/").getGet();
         assertNotNull(operation);
-        assertEquals(5, operation.getServers().size());
+        assertEquals(operation.getServers().size(), 5);
         assertEquals(operation.getServers().get(0).getUrl(), "http://class1");
         assertEquals(operation.getServers().get(1).getUrl(), "http://class2");
         assertEquals(operation.getServers().get(2).getUrl(), "http://method1");
@@ -376,7 +412,7 @@ public class ReaderTest {
         Method[] methods = ResponsesResource.class.getMethods();
 
         Operation responseOperation = reader.parseMethod(Arrays.stream(methods).filter(
-                (method -> method.getName().equals("getResponses"))).findFirst().get(), null, null);
+                (method -> method.getName().equals("getResponses"))).findFirst().get(), null, null, false);
         assertNotNull(responseOperation);
 
         ApiResponses responses = responseOperation.getResponses();
@@ -622,7 +658,7 @@ public class ReaderTest {
         Reader reader = new Reader(new OpenAPI());
         Method[] methods = SecurityResource.class.getDeclaredMethods();
         Operation securityOperation = reader.parseMethod(Arrays.stream(methods).filter(
-                (method -> method.getName().equals("getSecurity"))).findFirst().get(), null, null);
+                (method -> method.getName().equals("getSecurity"))).findFirst().get(), null, null, false);
         assertNotNull(securityOperation);
         List<SecurityRequirement> securityRequirements = securityOperation.getSecurity();
         assertNotNull(securityRequirements);
@@ -638,7 +674,7 @@ public class ReaderTest {
     public void testGetCallbacks() {
         Reader reader = new Reader(new OpenAPI());
         Method[] methods = SimpleCallbackResource.class.getMethods();
-        Operation callbackOperation = reader.parseMethod(methods[0], null, null);
+        Operation callbackOperation = reader.parseMethod(methods[0], null, null, false);
         assertNotNull(callbackOperation);
         Map<String, Callback> callbacks = callbackOperation.getCallbacks();
         assertNotNull(callbacks);

@@ -46,8 +46,10 @@ import io.swagger.v3.jaxrs2.petstore.tags.TagClassResource;
 import io.swagger.v3.jaxrs2.petstore.tags.TagMethodResource;
 import io.swagger.v3.jaxrs2.petstore.tags.TagOpenAPIDefinitionResource;
 import io.swagger.v3.jaxrs2.petstore.tags.TagOperationResource;
+import io.swagger.v3.jaxrs2.petstore.tags.CompleteTag32Resource;
 import io.swagger.v3.oas.integration.SwaggerConfiguration;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.SpecVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
@@ -72,6 +74,7 @@ public class PetResourceTest extends AbstractAnnotationTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(PetResourceTest.class);
     private static final String PETSTORE_SOURCE = "petstore/";
     private static final String TAGS_SOURCE = "petstore/tags/";
+    private static final String TAGS_32_SOURCE = "petstore/tags/oas32/";
     private static final String OPERATIONS_SOURCE = "petstore/operation/";
     private static final String CALLBACKS_SOURCE = "petstore/callbacks/";
     private static final String RESPONSES_SOURCE = "petstore/responses/";
@@ -126,7 +129,7 @@ public class PetResourceTest extends AbstractAnnotationTest {
     }
 
     @Test(description = "Test RequestBody resource)")
-    public void tetRequestBodyResource() {
+    public void testRequestBodyResource() {
         compare(RequestBodyResource.class, REQUEST_BODIES_SOURCE);
         compare(RequestBodyParameterPriorityResource.class, REQUEST_BODIES_SOURCE);
         compare(RequestBodyMethodPriorityResource.class, REQUEST_BODIES_SOURCE);
@@ -170,6 +173,11 @@ public class PetResourceTest extends AbstractAnnotationTest {
         compare(TagClassResource.class, TAGS_SOURCE);
         compare(TagMethodResource.class, TAGS_SOURCE);
         compare(TagOperationResource.class, TAGS_SOURCE);
+    }
+
+    @Test(description = "Test Tags resource with OpenAPI 3.2")
+    public void testTagsResourceOAS32() {
+        compare(CompleteTag32Resource.class, TAGS_32_SOURCE, SpecVersion.V32);
     }
 
     @Test(description = "Test a full set of classes")
@@ -264,37 +272,37 @@ public class PetResourceTest extends AbstractAnnotationTest {
 
     @Test(description = "Test a resource with Links and Content)")
     public void testLinksAndContent31Resource() {
-        compare(LinksAndContent31Resource.class, LINKS_SOURCE, true);
+        compare(LinksAndContent31Resource.class, LINKS_SOURCE, SpecVersion.V31);
     }
 
     @Test(description = "Test OpenAPIDefinition resource)")
     public void testOpenAPI31DefinitionResource() {
-        compare(OpenAPI31DefinitionResource.class, PETSTORE_SOURCE, true);
+        compare(OpenAPI31DefinitionResource.class, PETSTORE_SOURCE, SpecVersion.V31);
     }
 
     @Test(description = "Test Parameters resources)")
     public void testParameters31Resource() {
-        compare(Parameters31Resource.class, PARAMETERS_SOURCE, true);
+        compare(Parameters31Resource.class, PARAMETERS_SOURCE, SpecVersion.V31);
     }
 
     @Test(description = "Test some resources with Callbacks)")
     public void testCallBacks31Resources() {
-        compare(ComplexCallback31Resource.class, CALLBACKS_SOURCE, true);
+        compare(ComplexCallback31Resource.class, CALLBACKS_SOURCE, SpecVersion.V31);
     }
 
     @Test(description = "Test some resources with Request Body)")
     public void testRequestBody31Resources() {
-        compare(RequestBody31Resource.class, REQUEST_BODIES_SOURCE, true);
+        compare(RequestBody31Resource.class, REQUEST_BODIES_SOURCE, SpecVersion.V31);
     }
 
     @Test(description = "Test webhook resources")
     public void testWebhooksResource() {
-        compare(WebHookResource.class, PETSTORE_SOURCE, true);
+        compare(WebHookResource.class, PETSTORE_SOURCE, SpecVersion.V31);
     }
 
     @Test(description = "Test method resources with array annotations")
     public void testMethodArrayResponseResource() {
-        compare(MethodArrayResponseResource.class, RESPONSES_SOURCE, true);
+        compare(MethodArrayResponseResource.class, RESPONSES_SOURCE, SpecVersion.V31);
     }
 
     /**
@@ -304,14 +312,16 @@ public class PetResourceTest extends AbstractAnnotationTest {
      * @param source where is the yaml.
      */
     private void compare(final Class clazz, final String source) {
-        compare(clazz, source, false);
+        compare(clazz, source, SpecVersion.V30);
     }
 
-    private void compare(final Class clazz, final String source, boolean openapi31) {
+    private void compare(final Class clazz, final String source, SpecVersion specVersion) {
         final String file = source + clazz.getSimpleName() + YAML_EXTENSION;
         try {
-            if (openapi31) {
+            if (specVersion.equals(SpecVersion.V31)) {
                 compareAsYamlOAS31(clazz, getOpenAPIAsString(file));
+            } else if (specVersion.equals(SpecVersion.V32)) {
+                compareAsYamlOAS32(clazz, getOpenAPIAsString(file));
             } else {
                 compareAsYaml(clazz, getOpenAPIAsString(file));
             }
