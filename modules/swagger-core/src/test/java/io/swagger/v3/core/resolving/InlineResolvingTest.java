@@ -4,10 +4,67 @@ import io.swagger.v3.core.converter.AnnotatedType;
 import io.swagger.v3.core.converter.ModelConverterContextImpl;
 import io.swagger.v3.core.jackson.ModelResolver;
 import io.swagger.v3.core.matchers.SerializationMatchers;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.testng.annotations.Test;
 
+import java.util.List;
+import java.util.Map;
+
 public class InlineResolvingTest extends SwaggerTestBase{
+
+    @Test
+    public void test() {
+
+        final ModelResolver modelResolver = new ModelResolver(mapper()).openapi31(false);
+        final ModelConverterContextImpl c = new ModelConverterContextImpl(modelResolver);
+        c.resolve(new AnnotatedType(MyClass.class));
+
+        String expectedYaml = "MyClass:\n" +
+                              "  type: object\n" +
+                              "  properties:\n" +
+                              "    component:\n" +
+                              "      type: string\n" +
+                              "    config:\n" +
+                              "      type: object\n" +
+                              "      additionalProperties: true\n" +
+                              "    slots:\n" +
+                              "      type: object\n" +
+                              "      additionalProperties:\n" +
+                              "        type: array\n" +
+                              "        items:\n" +
+                              "          $ref: \"#/components/schemas/MyClass\"";
+
+        SerializationMatchers.assertEqualsToYaml(c.getDefinedModels(), expectedYaml);
+
+    }
+
+    static class MyClass {
+
+        String component;
+
+        @Schema(additionalProperties = Schema.AdditionalPropertiesValue.TRUE)
+        Map<String, Object> config;
+
+        Map<String, List<MyClass>> slots;
+
+        public String getComponent() {
+            return component;
+        }
+
+        public Map<String, Object> getConfig() {
+            return config;
+        }
+
+        public Map<String, List<MyClass>> getSlots() {
+            return slots;
+        }
+
+    }
+
+    @ArraySchema(schema = @Schema(implementation = MyClass.class))
+    interface MyClassInterface {
+    }
 
     @Test
     public void testInlineResolving() {
