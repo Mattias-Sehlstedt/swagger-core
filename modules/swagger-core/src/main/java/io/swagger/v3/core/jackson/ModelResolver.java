@@ -240,7 +240,9 @@ public class ModelResolver extends AbstractModelConverter implements ModelConver
             }
         }
 
-        if (!annotatedType.isSkipOverride() && resolvedSchemaAnnotation != null && !Void.class.equals(resolvedSchemaAnnotation.implementation())) {
+        if (!annotatedType.isSkipOverride() &&
+            resolvedSchemaAnnotation != null &&
+            !Void.class.equals(resolvedSchemaAnnotation.implementation())) {
             Class<?> cls = resolvedSchemaAnnotation.implementation();
 
             LOGGER.debug("overriding datatype from {} to {}", type, cls.getName());
@@ -315,9 +317,10 @@ public class ModelResolver extends AbstractModelConverter implements ModelConver
             }
         }
 
-        if (model == null && !annotatedType.isSkipOverride() && resolvedSchemaAnnotation != null &&
-            StringUtils.isNotEmpty(resolvedSchemaAnnotation.type()) &&
-            !resolvedSchemaAnnotation.type().equals("object")) {
+        boolean nonObjectSchemaType = resolvedSchemaAnnotation != null &&
+                                      StringUtils.isNotEmpty(resolvedSchemaAnnotation.type()) &&
+                                      !resolvedSchemaAnnotation.type().equals(OBJECT_TYPE);
+        if (model == null && !annotatedType.isSkipOverride() && nonObjectSchemaType) {
             PrimitiveType primitiveType = PrimitiveType.fromTypeAndFormat(resolvedSchemaAnnotation.type(), resolvedSchemaAnnotation.format());
             if (primitiveType == null) {
                 primitiveType = PrimitiveType.fromType(type);
@@ -547,7 +550,7 @@ public class ModelResolver extends AbstractModelConverter implements ModelConver
                     return null;
                 }
                 if (annotatedType.isSchemaProperty() && annotatedType.getCtxAnnotations() != null && annotatedType.getCtxAnnotations().length > 0) {
-                    if (!"object".equals(items.getType())) {
+                    if (!OBJECT_TYPE.equals(items.getType())) {
                         for (Annotation annotation : annotatedType.getCtxAnnotations()) {
                             if (annotation instanceof XmlElement) {
                                 XmlElement xmlElement = (XmlElement) annotation;
@@ -599,9 +602,9 @@ public class ModelResolver extends AbstractModelConverter implements ModelConver
             model.name(name);
             if (isExplicitObjectType()) {
                 if (openapi31 && resolvedArrayAnnotation == null) {
-                    model.addType("object");
+                    model.addType(OBJECT_TYPE);
                 } else {
-                    model.type("object");
+                    model.type(OBJECT_TYPE);
                 }
             } else {
                 implicitObject = true;
@@ -615,9 +618,9 @@ public class ModelResolver extends AbstractModelConverter implements ModelConver
                 model = openapi31 ? new JsonSchema().name(name) : new Schema().name(name);
                 if (isExplicitObjectType()) {
                     if (openapi31 && resolvedArrayAnnotation == null) {
-                        model.addType("object");
+                        model.addType(OBJECT_TYPE);
                     } else {
-                        model.type("object");
+                        model.type(OBJECT_TYPE);
                     }
                 } else {
                     implicitObject = true;
@@ -1095,7 +1098,7 @@ public class ModelResolver extends AbstractModelConverter implements ModelConver
             if (!composedModelPropertiesAsSibling) {
                 if (schemaWithCompositionKeys.getAllOf() != null && !schemaWithCompositionKeys.getAllOf().isEmpty()) {
                     if (schemaWithCompositionKeys.getProperties() != null && !schemaWithCompositionKeys.getProperties().isEmpty()) {
-                        Schema propSchema = openapi31 ? new JsonSchema().typesItem("object") : new ObjectSchema();
+                        Schema propSchema = openapi31 ? new JsonSchema().typesItem(OBJECT_TYPE) : new ObjectSchema();
                         propSchema.properties(schemaWithCompositionKeys.getProperties());
                         schemaWithCompositionKeys.setProperties(null);
                         schemaWithCompositionKeys.addAllOfItem(propSchema);
@@ -2010,7 +2013,7 @@ public class ModelResolver extends AbstractModelConverter implements ModelConver
         return modified;
     }
 
-    private boolean resolveSubtypes(Schema model, BeanDescription bean, ModelConverterContext context, JsonView jsonViewAnnotation) {
+    protected boolean resolveSubtypes(Schema model, BeanDescription bean, ModelConverterContext context, JsonView jsonViewAnnotation) {
         final List<NamedType> types = _intr().findSubtypes(bean.getClassInfo());
         if (types == null) {
             return false;
@@ -2069,7 +2072,7 @@ public class ModelResolver extends AbstractModelConverter implements ModelConver
             if (!composedModelPropertiesAsSibling) {
                 if (composedSchema.getAllOf() != null && !composedSchema.getAllOf().isEmpty()) {
                     if (composedSchema.getProperties() != null && !composedSchema.getProperties().isEmpty()) {
-                        Schema propSchema = openapi31 ? new JsonSchema().typesItem("object") : new ObjectSchema();
+                        Schema propSchema = openapi31 ? new JsonSchema().typesItem(OBJECT_TYPE) : new ObjectSchema();
                         propSchema.properties(composedSchema.getProperties());
                         composedSchema.setProperties(null);
                         composedSchema.addAllOfItem(propSchema);
@@ -2713,7 +2716,7 @@ public class ModelResolver extends AbstractModelConverter implements ModelConver
                 if (JsonTypeInfo.Id.NAME.equals(id) && name == null) {
                     name = type.getRawClass().getSimpleName();
                 }
-                Schema wrapperSchema = openapi31 ? new JsonSchema().typesItem("object") : new ObjectSchema();
+                Schema wrapperSchema = openapi31 ? new JsonSchema().typesItem(OBJECT_TYPE) : new ObjectSchema();
                 wrapperSchema.name(model.getName());
                 wrapperSchema.addProperties(name, model);
                 return wrapperSchema;
