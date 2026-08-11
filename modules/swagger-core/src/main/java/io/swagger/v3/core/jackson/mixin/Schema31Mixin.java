@@ -7,12 +7,14 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -42,6 +44,7 @@ public abstract class Schema31Mixin {
 
     @JsonProperty("type")
     @JsonSerialize(using = TypeSerializer.class)
+    @JsonDeserialize(using = TypeDeserializer.class)
     public abstract Set<String> getTypes();
 
     @JsonAnyGetter
@@ -68,7 +71,7 @@ public abstract class Schema31Mixin {
         public void serialize(Set<String> types, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
             if (types != null && types.size() == 1) {
                 jsonGenerator.writeString((String)types.toArray()[0]);
-            } else if (types != null && types.size() > 1){
+            } else if (types != null && types.size() > 1) {
                 jsonGenerator.writeStartArray();
                 for (String t: types) {
                     jsonGenerator.writeString(t);
@@ -76,6 +79,30 @@ public abstract class Schema31Mixin {
                 jsonGenerator.writeEndArray();
             }
         }
+    }
+
+    public static class TypeDeserializer extends JsonDeserializer<Set<String>> {
+
+        @Override
+        public Set<String> deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+            JsonNode node = ctxt.readTree(p);
+            if (node == null || node.isNull()) {
+                return null;
+            }
+            Set<String> types = new LinkedHashSet<>();
+            if (node.isArray()) {
+                node.forEach(n -> {
+                    if (!n.isNull()) {
+                        types.add(n.asText());
+                    }
+                });
+            }
+            else {
+                types.add(node.asText());
+            }
+            return types;
+        }
+
     }
 
 }

@@ -1,5 +1,6 @@
 package io.swagger.v3.core.deserialization;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.v3.core.matchers.SerializationMatchers;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.core.util.Json31;
@@ -13,11 +14,15 @@ import io.swagger.v3.oas.models.media.Schema;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedHashSet;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
+import static org.testng.AssertJUnit.assertTrue;
 
 public class OpenAPI3_1DeserializationTest {
 
@@ -38,7 +43,6 @@ public class OpenAPI3_1DeserializationTest {
         assertNotNull(swagger);
         assertEquals(swagger.getInfo().getLicense().getIdentifier(), "test");
     }
-
 
     @Test
     public void deserializePetstore3_0() throws IOException {
@@ -264,6 +268,56 @@ public class OpenAPI3_1DeserializationTest {
         assertNotNull(baseNodeSchema.getProperties().get("children"));
         JsonSchema childrenSchema = (JsonSchema) baseNodeSchema.getProperties().get("children");
         assertEquals(childrenSchema.getItems().get$dynamicRef(), "#node");
+    }
+
+    @Test
+    public void testTypeSingleAndArrayDeserializationOnOAS31() throws Exception {
+        Schema<?> single = Json31.mapper().readValue("{\"type\":\"string\"}", Schema.class);
+        assertEquals(new LinkedHashSet<>(Collections.singletonList("string")), single.getTypes());
+
+        Schema<?> multi = Json31.mapper().readValue("{\"type\":[\"string\",\"null\"]}", Schema.class);
+        assertEquals(new LinkedHashSet<>(Arrays.asList("string", "null")), multi.getTypes());
+
+        Schema<?> yamlSingle = Yaml31.mapper().readValue("type: string", Schema.class);
+        assertEquals(new LinkedHashSet<>(Collections.singletonList("string")), yamlSingle.getTypes());
+
+        JsonSchema jsonSchemaSingle = Json31.mapper().readValue("{\"type\":\"string\"}", JsonSchema.class);
+        assertEquals(new LinkedHashSet<>(Collections.singletonList("string")), jsonSchemaSingle.getTypes());
+
+        JsonSchema jsonSchemaMulti = Json31.mapper().readValue("{\"type\":[\"string\",\"null\"]}", JsonSchema.class);
+        assertEquals(new LinkedHashSet<>(Arrays.asList("string", "null")), jsonSchemaMulti.getTypes());
+
+        JsonSchema jsonSchemaYamlSingle = Yaml31.mapper().readValue("type: string", JsonSchema.class);
+        assertEquals(new LinkedHashSet<>(Collections.singletonList("string")), jsonSchemaYamlSingle.getTypes());
+    }
+
+    @Test
+    public void testJsonSchemaScalarTypeRoundTrip() throws JsonProcessingException {
+        JsonSchema jsonSchemaScalarType = new JsonSchema();
+        jsonSchemaScalarType.types(new LinkedHashSet<>(Collections.singletonList("string")));
+        String jsonSchemaScalarTypeJson = Json31.mapper().writeValueAsString(jsonSchemaScalarType);
+        assertEquals(Json31.mapper().readValue(jsonSchemaScalarTypeJson, JsonSchema.class), jsonSchemaScalarType);
+    }
+
+    @Test
+    public void testJsonSchemaArrayTypeRoundTrip() throws JsonProcessingException {
+        JsonSchema schema = new JsonSchema();
+        schema.types(new LinkedHashSet<>(Arrays.asList("string", "null")));
+        String json = Json31.mapper().writeValueAsString(schema);
+        assertEquals(Json31.mapper().readValue(json, JsonSchema.class), schema);
+    }
+
+    @Test
+    public void testEmptyTypeArrayDeserializationOnOAS31() throws Exception {
+        // mixin path
+        JsonSchema viaMixin = Json31.mapper().readValue("{\"type\":[]}", JsonSchema.class);
+        assertNotNull(viaMixin.getTypes());
+        assertTrue(viaMixin.getTypes().isEmpty());
+
+        // ModelDeserializer path
+        Schema<?> viaModel = Json31.mapper().readValue("{\"type\":[]}", Schema.class);
+        assertNotNull(viaModel.getTypes());
+        assertTrue(viaModel.getTypes().isEmpty());
     }
 
 }
